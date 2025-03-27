@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 
@@ -23,8 +24,14 @@ def test_rule(rule_file, elastic_url, api_key):
         return None
 
 def main():
-    elastic_url = "https://<your-elastic-url>"
-    api_key = "<your-api-key>"
+    # Lấy URL và API key từ biến môi trường
+    elastic_url = os.getenv("ELASTIC_URL")
+    api_key = os.getenv("ELASTIC_API_KEY")
+    
+    if not elastic_url or not api_key:
+        print("Error: Missing ELASTIC_URL or ELASTIC_API_KEY environment variables.")
+        exit(1)
+
     rules_dir = "./converted-rules"
     for rule_file in os.listdir(rules_dir):
         if rule_file.endswith(".json"):
