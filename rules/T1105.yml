@@ -1,0 +1,35 @@
+title: Suspicious File Transfer Tools Usage
+id: 6a7e1b3e-d1f8-42a6-abe3-835f07db6c6e
+description: Detects the usage of scp, rsync, wget, or curl with suspicious parameters indicative of file transfer activity.
+status: experimental
+logsource:
+  product: linux
+  service: process_creation
+detection:
+  selection:
+    EventID: 1
+    ProcessName:
+      - "scp"
+      - "rsync"
+      - "wget"
+      - "curl"
+    CommandLine|contains:
+      - "http://"
+      - "https://"
+      - "--server"
+      - "--sender"
+  condition: selection
+fields:
+  - EventID
+  - ProcessName
+  - CommandLine
+  - User
+  - Hostname
+  - DestinationIp
+  - DestinationPort
+level: medium
+tags:
+  - attack.t1105
+  - attack.execution
+  - attack.lateral_movement
+
