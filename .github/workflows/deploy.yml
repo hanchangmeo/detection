@@ -26,7 +26,9 @@ jobs:
       run: |
         git clone https://github.com/SigmaHQ/sigma.git
         cd sigma
-        pip install -r requirements.txt
+        pip install sigmatools
+        pip install pyyaml elasticsearch click pytest requests
+        pip install sigmatools
 
     # Bước 4: Validate Sigma Rules
     - name: Validate Sigma Rules
