@@ -1,40 +1,42 @@
 import os
-import json
+import sys
+import yaml
 
 def validate_rule(file_path):
     try:
         with open(file_path, 'r') as f:
-            data = json.load(f)  # Kiểm tra định dạng JSON
-        required_fields = ["rule_name", "query", "description", "tags", "level"]
+            data = yaml.safe_load(f)  # Đọc file .yml
+        required_fields = ["title", "description", "logsource", "detection", "level"]
         for field in required_fields:
             if field not in data:
                 print(f"Error: Missing field '{field}' in {file_path}")
                 return False
         print(f"PASSED: {file_path}")
         return True
-    except json.JSONDecodeError:
-        print(f"FAILED: {file_path} - Invalid JSON format")
+    except yaml.YAMLError as e:
+        print(f"FAILED: {file_path} - Invalid YAML format: {e}")
         return False
 
 def main():
     rules_dir = "./rules"
-    failed_rules = []
+    if not os.path.exists(rules_dir):
+        print(f"Error: Directory {rules_dir} not found.")
+        sys.exit(1)
 
-    for root, _, files in os.walk(rules_dir):
-        for file in files:
-            if file.endswith(".json"):
-                file_path = os.path.join(root, file)
-                if not validate_rule(file_path):
-                    failed_rules.append(file_path)
+    failed_rules = []
+    for rule_file in os.listdir(rules_dir):
+        if rule_file.endswith(".yml"):
+            file_path = os.path.join(rules_dir, rule_file)
+            if not validate_rule(file_path):
+                failed_rules.append(file_path)
 
     if failed_rules:
-        print("The following rules failed validation:")
+        print("Failed rules:")
         for rule in failed_rules:
             print(f"- {rule}")
-        exit(1)
+        sys.exit(1)
     else:
         print("All rules passed validation!")
 
 if __name__ == "__main__":
     main()
-
