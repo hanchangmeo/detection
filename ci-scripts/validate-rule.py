@@ -1,20 +1,16 @@
 import os
 import sys
-import yaml
+from sigma.collection import SigmaCollection
 
 def validate_rule(file_path):
     try:
+        # Dùng pySigma để parse và validate file .yml
         with open(file_path, 'r') as f:
-            data = yaml.safe_load(f)  # Đọc file .yml
-        required_fields = ["title", "description", "logsource", "detection", "level"]
-        for field in required_fields:
-            if field not in data:
-                print(f"Error: Missing field '{field}' in {file_path}")
-                return False
+            SigmaCollection.from_yaml(f)  # Nếu parse được thì rule hợp lệ
         print(f"PASSED: {file_path}")
         return True
-    except yaml.YAMLError as e:
-        print(f"FAILED: {file_path} - Invalid YAML format: {e}")
+    except Exception as e:
+        print(f"FAILED: {file_path} - Invalid Sigma rule: {e}")
         return False
 
 def main():
