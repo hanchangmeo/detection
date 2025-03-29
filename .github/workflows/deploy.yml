@@ -26,26 +26,21 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip
-
-    - name: Install Sigma dependencies
-      run: |
-        pip install pySigma sigmatools pyyaml elasticsearch click pytest requests
+        pip install sigmatools pyyaml elasticsearch click pytest requests
 
     - name: Validate Sigma Rules
-      run: |
-        python3 ci-scripts/validate-rule.py || exit 1
+      run: python3 ci-scripts/validate-rule.py || exit 1
 
     - name: Convert Sigma Rules
       run: |
         python3 ci-scripts/convert_sigma.py
+        ls -la converted_rules/ || echo "No files in converted_rules/"
 
     - name: Test Converted Rules
       env:
         ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
         ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
-      if: env.ELASTIC_URL != '' && env.ELASTIC_API_KEY != ''
-      run: |
-        python3 ci-scripts/test_rules.py || exit 1
+      run: python3 ci-scripts/test_rules.py || exit 1
 
     - name: Deploy Rules to Elasticsearch
       if: success()
@@ -53,35 +48,16 @@ jobs:
         ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
         ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
       run: |
-        for rule_file in converted_rules/*.json; do
-          curl -X POST "${ELASTIC_URL}/api/detection_engine/rules" \
-            -H "Authorization: ApiKey ${ELASTIC_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "@${rule_file}" || exit 1
-        done
-
-    - name: Notify Success
-      if: success()
-      run: echo "All Sigma rules passed testing and deployed successfully."
-
-    - name: Merge dev into main
-      if: success()
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        git config --global user.name "hanchangmeo"
-        git config --global user.email "hanchiangzo@gmail.com"
-        git fetch origin
-        git checkout main
-        if git diff --name-only origin/main...origin/dev | grep '^rules/'; then
-          git checkout dev -- rules/
-          git add rules/
-          git commit -m "Merge updated rules from dev to main"
-          git push origin main
+        if ls converted_rules/*.json >/dev/null 2>&1; then
+          for rule_file in converted_rules/*.json; do
+            echo "Deploying ${rule_file}..."
+            curl -X POST "${ELASTIC_URL}/api/detection_engine/rules" \
+              -H "Authorization: ApiKey ${ELASTIC_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "@${rule_file}" || exit 1
+            echo "Deployed ${rule_file} successfully"
+          done
         else
-          echo "No changes in rules detected. Skipping merge."
+          echo "No JSON files found in converted_rules/. Skipping deployment."
+          exit 0
         fi
-
-    - name: Notify Failure
-      if: failure()
-      run: echo "Workflow failed at some step. Check logs for details."
