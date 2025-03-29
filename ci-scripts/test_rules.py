@@ -1,33 +1,23 @@
 import os
-import json
+import sys
 import requests
 
 def test_rule(rule_file, elastic_url, api_key):
-    with open(rule_file, 'r') as f:
-        query_str = f.read().strip()  # Đọc chuỗi query DSL từ sigmac
+    try:
+        with open(rule_file, 'r') as f:
+            query_str = f.read().strip()
 
-    # Tạo truy vấn _search đơn giản để test
-    search_query = {
-        "query": {
-            "query_string": {
-                "query": query_str
-            }
-        }
-    }
+        search_query = {"query": {"query_string": {"query": query_str}}}
+        headers = {"Authorization": f"ApiKey {api_key}", "Content-Type": "application/json"}
 
-    headers = {
-        "Authorization": f"ApiKey {api_key}",
-        "Content-Type": "application/json"
-    }
+        response = requests.post(f"{elastic_url}/_search", headers=headers, json=search_query, timeout=10)
+        response.raise_for_status()  # Ném lỗi nếu không phải 200
 
-    response = requests.post(f"{elastic_url}/_search", headers=headers, json=search_query)
-    if response.status_code == 200:
-        result = response.json()
-        total_hits = result['hits']['total']['value']
+        total_hits = response.json()['hits']['total']['value']
         print(f"Rule: {rule_file} - Hits: {total_hits}")
-        return total_hits > 0  # Trả về True nếu có kết quả khớp
-    else:
-        print(f"Error testing {rule_file}: {response.text}")
+        return total_hits > 0
+    except Exception as e:
+        print(f"Error testing {rule_file}: {e}")
         return False
 
 def main():
@@ -38,7 +28,7 @@ def main():
         print("Error: Missing ELASTIC_URL or ELASTIC_API_KEY.")
         sys.exit(1)
 
-    rules_dir = "./converted_rules"  # Đồng bộ với convert_sigma.py
+    rules_dir = "./converted_rules"
     if not os.path.exists(rules_dir):
         print(f"Error: Directory {rules_dir} not found.")
         sys.exit(1)
