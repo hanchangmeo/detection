@@ -21,12 +21,14 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Setup Python environment
+    - name: Install dependencies
       run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install pySigma requests  # Chỉ cần pySigma và requests
+        python -m pip install --upgrade pip
+        pip install pySigma requests
+
+    - name: Verify pySigma installation
+      run: |
+        pip show pySigma || echo "pySigma not installed"
 
     - name: Validate Sigma Rules
       run: python3 ci-scripts/validate-rule.py || exit 1
