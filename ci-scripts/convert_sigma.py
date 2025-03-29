@@ -1,22 +1,25 @@
 import os
-import subprocess
 import sys
+from sigma.collection import SigmaCollection
+from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend
 
 def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
     try:
-        # Dùng lệnh sigmac trực tiếp (cài qua pip)
-        result = subprocess.run(
-            ["sigmac", "-t", "es-qs", sigma_rule_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        if result.returncode != 0:
-            raise Exception(f"Error in Sigma conversion: {result.stderr}")
+        # Đọc file Sigma .yml
+        with open(sigma_rule_path, 'r') as f:
+            sigma_rule = f.read()
 
+        # Chuyển đổi Sigma rule thành đối tượng SigmaCollection
+        sigma_collection = SigmaCollection.from_yaml(sigma_rule)
+
+        # Sử dụng pySigma backend để tạo Elasticsearch Query DSL
+        backend = ElasticsearchQuerystringBackend()
+        query = backend.convert(sigma_collection)[0]  # Lấy query đầu tiên
+
+        # Ghi query vào file .json
         output_file = os.path.join(output_path, os.path.basename(sigma_rule_path).replace(".yml", ".json"))
         with open(output_file, "w") as f:
-            f.write(result.stdout)
+            f.write(query)
         print(f"Converted {sigma_rule_path} to {output_file}")
         return True
     except Exception as e:
