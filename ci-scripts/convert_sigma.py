@@ -1,7 +1,7 @@
 import os
 import sys
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend
+from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend  # Sửa import
 
 def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
     try:
@@ -9,7 +9,7 @@ def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
             sigma_rule = f.read()
 
         sigma_collection = SigmaCollection.from_yaml(sigma_rule)
-        backend = ElasticsearchQuerystringBackend()
+        backend = ElasticsearchQuerystringBackend()  # Khởi tạo backend
         query = backend.convert(sigma_collection)[0]
 
         output_file = os.path.join(output_path, os.path.basename(sigma_rule_path).replace(".yml", ".json"))
