@@ -24,11 +24,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pySigma requests
+        pip install pySigma pysigma-backend-elasticsearch requests  # Thêm backend Elasticsearch
 
     - name: Verify pySigma installation
       run: |
-        pip show pySigma || echo "pySigma not installed"
+        pip show pySigma
+        pip show pysigma-backend-elasticsearch
 
     - name: Validate Sigma Rules
       run: python3 ci-scripts/validate-rule.py || exit 1
