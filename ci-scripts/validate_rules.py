@@ -1,6 +1,6 @@
 import os
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch import ElasticsearchQueryBackend
+from sigma.backends.elasticsearch.elasticsearch import ElasticsearchQueryBackend
 import yaml
 
 def validate_sigma_rules(rules_dir="rules"):
