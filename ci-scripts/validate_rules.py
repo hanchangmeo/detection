@@ -1,7 +1,6 @@
 import os
 from sigma.collection import SigmaCollection
 from sigma.backends.elasticsearch.elasticsearch import LuceneBackend
-import yaml
 
 def validate_sigma_rules(rules_dir="rules"):
     # Khởi tạo backend Lucene cho Elasticsearch
@@ -15,11 +14,11 @@ def validate_sigma_rules(rules_dir="rules"):
                 rule_path = os.path.join(root, file)
                 print(f"Validating: {rule_path}")
                 try:
-                    # Đọc nội dung file YAML
+                    # Đọc nội dung file YAML dưới dạng chuỗi
                     with open(rule_path, 'r') as f:
-                        rule_content = yaml.safe_load(f)
+                        rule_content = f.read()  # Lấy chuỗi YAML thô
                     
-                    # Tạo SigmaCollection từ rule
+                    # Tạo SigmaCollection từ chuỗi YAML
                     sigma_rule = SigmaCollection.from_yaml(rule_content)
                     
                     # Chuyển đổi rule thành query Lucene
