@@ -1,7 +1,6 @@
 import os
 import sys
 from sigma.collection import SigmaCollection
-from sigma.parser.collection import SigmaCollectionParser
 from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend
 from sigma.pipelines.elasticsearch import ElasticsearchPipeline
 
@@ -12,20 +11,19 @@ def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
             sigma_rule = f.read()
 
         # Parse rule
-        sigma_parser = SigmaCollectionParser(sigma_rule)
-        sigma_collection = sigma_parser.parse()
+        sigma_collection = SigmaCollection.from_yaml(sigma_rule)
 
         # Khởi tạo backend với pipeline
         pipeline = ElasticsearchPipeline()
-        backend = ElasticsearchQuerystringBackend(pipeline)
+        backend = ElasticsearchQuerystringBackend(pipeline=pipeline)
         
         # Chuyển đổi rule
-        query = backend.convert(sigma_collection)[0]
+        queries = backend.convert(sigma_collection)
 
         # Ghi kết quả ra file JSON
         output_file = os.path.join(output_path, os.path.basename(sigma_rule_path).replace(".yml", ".json"))
         with open(output_file, "w") as f:
-            f.write(query)
+            f.write(queries[0])  # Lấy query đầu tiên
 
         print(f" Converted {sigma_rule_path} → {output_file}")
         return True
