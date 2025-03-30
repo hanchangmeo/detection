@@ -1,8 +1,8 @@
 import os
 import sys
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend
-from sigma.pipelines.elasticsearch import ElasticsearchPipeline
+from sigma.backends.elasticsearch.es_querystring import ElasticsearchQuerystringBackend
+from sigma.pipelines.elasticsearch.elasticsearch import ElasticsearchPipeline
 
 def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
     try:
@@ -13,10 +13,10 @@ def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
         # Parse rule
         sigma_collection = SigmaCollection.from_yaml(sigma_rule)
 
-        # Khởi tạo backend với pipeline
-        pipeline = ElasticsearchPipeline()
-        backend = ElasticsearchQuerystringBackend(pipeline=pipeline)
-        
+        # Khởi tạo pipeline và backend
+        pipeline = ElasticsearchPipeline()  
+        backend = ElasticsearchQuerystringBackend(pipeline)
+
         # Chuyển đổi rule
         queries = backend.convert(sigma_collection)
 
