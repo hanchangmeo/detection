@@ -29,10 +29,25 @@ jobs:
         run: |
           python ci-scripts/validate_rules.py
 
-      - name: Deploy to Elasticsearch
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-        env:
-          ELASTIC_HOST: ${{ secrets.ELASTIC_URL }}
-          ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
+      - name: Convert Sigma Rules to Elasticsearch Queries
         run: |
-          python scripts/deploy_to_elastic.py
+          python ci-scripts/convert_rules.py rules/ test/ queries/
+
+      - name: Test Sigma Rules with Sample Logs
+        run: |
+          python ci-scripts/test_with_sample_log.py queries/ test/
+        # Nếu không pass, pipeline dừng lại
+
+      - name: Clone and Merge to main
+        if: success()
+        run: |
+          git clone https://github.com/hanchangmeo/detection.git-link.github_pat_${{ secrets.PERSONAL_ACCESS_TOKEN }} temp-repo
+          cd temp-repo
+          git config --global user.name "hanchangmeo"
+          git config --global user.email "hanchiangzo@gmail.com"
+          git fetch origin
+          git checkout main
+          git merge origin/dev --no-ff -m "Merge validated Sigma rules from dev"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
