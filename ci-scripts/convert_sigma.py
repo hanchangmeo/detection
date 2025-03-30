@@ -1,7 +1,7 @@
 import os
 import sys
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch import ElasticsearchQuerystringBackend  # Import mới
+from sigma.backends.elasticsearch.esquerystring import ElasticsearchQuerystringBackend  # Import mới
 
 def convert_sigma_to_elasticsearch(sigma_rule_path, output_path):
     try:
