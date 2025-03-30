@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from sigma.collection import SigmaCollection
 from sigma.backends.elasticsearch import LuceneBackend
 
