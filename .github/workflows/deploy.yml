@@ -1,70 +1,38 @@
-name: Test, Convert, and Deploy Detection Rules
+name: Sigma Detection Pipeline
 
 on:
   push:
     branches:
       - dev
-
-permissions:
-  contents: write
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  test-convert-deploy:
+  validate-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pySigma==0.11.19 pysigma-backend-elasticsearch==1.1.5 requests
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
-    - name: Verify pySigma installation
-      run: |
-        pip show pySigma
-        pip show pysigma-backend-elasticsearch
+      - name: Validate Sigma Rules
+        run: |
+          python ci-scripts/validate_rules.py
 
-    - name: Validate Sigma Rules
-      run: |
-        python3 ci-scripts/validate-rule.py
-      continue-on-error: false  # Nếu lỗi, dừng job ngay lập tức
-
-    - name: Convert Sigma Rules
-      run: |
-        mkdir -p converted_rules  # Đảm bảo thư mục tồn tại trước khi sử dụng
-        python3 ci-scripts/convert_sigma.py
-        ls -la converted_rules/
-
-    - name: Test Converted Rules
-      env:
-        ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
-        ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
-      run: |
-        python3 ci-scripts/test_rules.py
-
-    - name: Deploy Rules to Elasticsearch
-      if: success()
-      env:
-        ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
-        ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
-      run: |
-        if [ -z "$(ls -A converted_rules/*.json 2>/dev/null)" ]; then
-          echo "No JSON files found in converted_rules/. Skipping deployment."
-          exit 0
-        fi
-
-        for rule_file in converted_rules/*.json; do
-          echo "Deploying ${rule_file}..."
-          curl -X POST "${ELASTIC_URL}/api/detection_engine/rules" \
-            -H "Authorization: ApiKey ${ELASTIC_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "@${rule_file}" || { echo "Failed to deploy ${rule_file}"; exit 1; }
-          echo "Deployed ${rule_file} successfully"
-        done
+      - name: Deploy to Elasticsearch
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        env:
+          ELASTIC_HOST: ${{ secrets.ELASTIC_URL }}
+          ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
+        run: |
+          python scripts/deploy_to_elastic.py
