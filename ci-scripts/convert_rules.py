@@ -12,7 +12,7 @@ output_dir = sys.argv[3] # queries/
 os.makedirs(output_dir, exist_ok=True)
 
 # Backend Elasticsearch
-backend = ElasticsearchQuerystringBackend()
+backend = LuceneBackend()
 
 # Duyệt qua tất Deed tất cả file .yml trong rules/
 for rule_file in os.listdir(rules_dir):
