@@ -10,8 +10,27 @@ logs_dir = sys.argv[2]    # test/
 logs = []
 for log_file in os.listdir(logs_dir):
     if log_file.endswith('.json'):
-        with open(os.path.join(logs_dir, log_file), 'r') as f:
-            logs.extend([json.loads(line) for line in f])
+        log_path = os.path.join(logs_dir, log_file)
+        with open(log_path, 'r') as f:
+            content = f.read().strip()
+            try:
+                # Thử đọc như một mảng JSON lớn
+                logs_data = json.loads(content)
+                if isinstance(logs_data, list):
+                    logs.extend(logs_data)
+                else:
+                    logs.append(logs_data)
+            except json.JSONDecodeError:
+                # Nếu không phải mảng, đọc từng dòng
+                f.seek(0)  # Reset con trỏ file về đầu
+                for line in f:
+                    line = line.strip()
+                    if line:  # Bỏ qua dòng trống
+                        try:
+                            logs.append(json.loads(line))
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing line in {log_file}: {e}")
+                            sys.exit(1)
 
 # Hàm kiểm tra log có khớp với query không
 def matches_query(log, query):
@@ -30,7 +49,6 @@ for query_file in os.listdir(queries_dir):
             query_data = json.load(f)
             query = query_data["query"]
         
-        # Kiểm tra với tất cả log
         for log in logs:
             if matches_query(log, query):
                 print(f"Rule {query_file} passed with sample log!")
