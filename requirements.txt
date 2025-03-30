@@ -2,3 +2,4 @@ pysigma==0.10.6
 pysigma-backend-elasticsearch==1.0.6
 requests==2.31.0
 pyyaml==6.0.1
+pyparsing==2.4.7
