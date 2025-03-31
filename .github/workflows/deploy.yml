@@ -41,7 +41,7 @@ jobs:
           python ci-scripts/test_sigma_rules.py rules/ test/
         # Nếu không pass, pipeline dừng lại
 
-      - name: Push Rules to Main
+      - name: Merge Passed Rules to Main
         if: success()
         run: |
           # Clone nhánh main
@@ -51,19 +51,24 @@ jobs:
           git config --global user.email "hanchiangzo@gmail.com"
           git checkout main
 
-          # Copy các file rules từ dev sang main (ghi đè nếu trùng)
-          cp -r ../rules/* rules/
+          # Fetch nhánh dev để truy cập các rule
+          git fetch origin
+
+          # Merge chỉ các rule đã pass từ dev
+          while IFS= read -r rule; do
+            git checkout origin/dev -- "rules/$rule"
+          done < ../passed_rules.txt
 
           # Kiểm tra thay đổi
           git status
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
             exit 0
           fi
 
-          # Commit và push chỉ các file rules
+          # Commit và push
           git add rules/
-          git commit -m "Update Sigma rules from dev to main"
+          git commit -m "Merge passed Sigma rules from dev to main"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
