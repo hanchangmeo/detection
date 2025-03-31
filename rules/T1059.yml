@@ -1,0 +1,26 @@
+title: T1059 - Malicious Command Execution via Python
+id: a96d2a90-9341-11ed-b1eb-0242ac120003
+status: experimental
+description: Detects malicious use of Python to execute commands.
+author: Meo
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    process.command_line|contains:
+      - "python -c"
+      - "import requests"
+      - "os.system"
+  condition: selection
+fields:
+  - process.command_line
+  - process.parent_name
+  - user.name
+falsepositives:
+  - Python usage by developers or system administrators
+level: high
+tags:
+  - attack.execution
+  - attack.t1059
+
