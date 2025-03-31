@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with: 
+          ref: dev
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -29,13 +32,13 @@ jobs:
         run: |
           python ci-scripts/validate_rules.py
 
-      - name: Convert Sigma Rules to Elasticsearch Queries
-        run: |
-          python ci-scripts/convert_rules.py rules/ test/ queries/
+   #   - name: Convert Sigma Rules to Elasticsearch Queries
+    #    run: |
+     #     python ci-scripts/convert_rules.py rules/ test/ queries/
 
       - name: Test Sigma Rules with Sample Logs
         run: |
-          python ci-scripts/test_with_sample_log.py queries/ test/
+          python ci-scripts/test_with_sample_log.py rules/ test/
         # Nếu không pass, pipeline dừng lại
 
       - name: Clone and Merge to main
