@@ -45,8 +45,7 @@ jobs:
         if: success()
         run: |
           # Clone nhánh main
-          git clone https://github_pat_${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/hanchangmeo/detection.git temp-repo
-          cd temp-repo
+          git clone https://github.com/hanchangmeo/detection.git
           git config --global user.name "hanchangmeo"
           git config --global user.email "hanchiangzo@gmail.com"
           git checkout main
