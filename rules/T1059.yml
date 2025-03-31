@@ -8,9 +8,8 @@ logsource:
   product: linux
 detection:
   selection:
-    CommandLine|contains|all:
-      - "python"
-      - "-c"
+    process.command_line|contains:
+      - "python -c"
       - "import requests"
       - "os.system"
   condition: selection
