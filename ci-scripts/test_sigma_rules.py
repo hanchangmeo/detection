@@ -49,10 +49,8 @@ def get_nested_value(log, field):
 
 # Hàm kiểm tra log có khớp với query không
 def matches_query(log, query):
-    # Tách các điều kiện AND
     and_conditions = query.split(" AND ")
     for condition in and_conditions:
-        # Xử lý điều kiện OR trong ngoặc
         if "(" in condition and ")" in condition:
             or_part = condition[condition.index("(")+1:condition.index(")")]
             field = condition.split(":")[0].strip()
@@ -74,7 +72,6 @@ def matches_query(log, query):
             if not matched:
                 print(f"No match for OR condition '{field}:({or_part})' in log value '{log_value}'")
                 return False
-        # Điều kiện đơn giản
         elif ":" in condition:
             key, value = condition.split(":")
             value = value.strip('"')
@@ -102,17 +99,13 @@ for rule_file in os.listdir(rules_dir):
             print(f"No corresponding log file found for {rule_file} (expected {log_file})")
             sys.exit(1)
         
-        # Đọc log từ file tương ứng
         logs = load_logs(log_file)
-        
-        # Đọc và chuyển đổi Sigma rule thành query
         with open(os.path.join(rules_dir, rule_file), 'r') as f:
             rule_content = f.read()
         sigma_collection = SigmaCollection.from_yaml(rule_content)
-        query = backend.convert(sigma_collection)[0]  # Query Lucene/Elasticsearch
+        query = backend.convert(sigma_collection)[0]
         print(f"Generated query for {rule_file}: {query}")
         
-        # Kiểm tra với log
         for log in logs:
             if matches_query(log, query):
                 print(f"Rule {rule_file} passed with sample log in {log_file}!")
@@ -126,3 +119,8 @@ if not passed_rules:
     sys.exit(1)
 
 print(f"Passed rules: {passed_rules}")
+
+# Ghi danh sách rule pass vào file
+with open("passed_rules.txt", "w") as f:
+    for rule in passed_rules:
+        f.write(f"{rule}\n")
