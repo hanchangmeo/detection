@@ -2,14 +2,14 @@ import os
 import sys
 import json
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.elasticsearch import LuceneQuerystringBackend
+from sigma.backends.elasticsearch import LuceneBackend
 
 # Đường dẫn đầu vào
 rules_dir = sys.argv[1]  # rules/
 logs_dir = sys.argv[2]  # test/
 
 # Backend Elasticsearch
-backend = LuceneQuerystringBackend()  # Dùng ElasticsearchBackend thay vì ElasticsearchQuerystringBackend
+backend = LuceneBackend()  # Dùng ElasticsearchBackend thay vì ElasticsearchQuerystringBackend
 
 # Hàm đọc log từ file
 def load_logs(log_file_path):
