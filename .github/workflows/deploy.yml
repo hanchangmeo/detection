@@ -6,7 +6,7 @@ on:
       - dev
   pull_request:
     branches:
-      - main
+      - dev
 
 jobs:
   validate-and-deploy:
@@ -52,11 +52,15 @@ jobs:
 
           # Fetch nhánh dev để truy cập các rule
           git fetch origin
+          if [ ! -f "passed_rules.txt" ]; then
+            echo "Error: passed_rules.txt not found!"
+            exit 1
+          fi         
 
           # Merge chỉ các rule đã pass từ dev
           while IFS= read -r rule; do
             git checkout origin/dev -- "rules/$rule"
-          done < ../passed_rules.txt
+          done < passed_rules.txt
 
           # Kiểm tra thay đổi
           git status
