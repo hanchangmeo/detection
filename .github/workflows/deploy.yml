@@ -38,7 +38,7 @@ jobs:
 
       - name: Test Sigma Rules with Sample Logs
         run: |
-          python ci-scripts/test_with_sample_log.py rules/ test/
+          python ci-scripts/test_sigma_rules.py rules/ test/
         # Nếu không pass, pipeline dừng lại
 
       - name: Clone and Merge to main
