@@ -35,23 +35,59 @@ def load_logs(log_file_path):
     print(f"Loaded {len(logs)} log entries from {log_file_path}")
     return logs
 
-# Hàm kiểm tra log có khớp với query không (hỗ trợ wildcard)
+# Hàm lấy giá trị từ field lồng trong log
+def get_nested_value(log, field):
+    keys = field.split(".")
+    value = log
+    for key in keys:
+        try:
+            value = value[key]
+        except (KeyError, TypeError):
+            print(f"Field '{field}' not found in log: {log}")
+            return None
+    return str(value) if value is not None else None
+
+# Hàm kiểm tra log có khớp với query không
 def matches_query(log, query):
-    for condition in query.split(" AND "):
-        if ":" in condition:
-            key, value = condition.split(":")
-            value = value.strip('"')  # Bỏ dấu nháy kép
-            if key not in log:
-                print(f"Field '{key}' not found in log: {log}")
+    # Tách các điều kiện AND
+    and_conditions = query.split(" AND ")
+    for condition in and_conditions:
+        # Xử lý điều kiện OR trong ngoặc
+        if "(" in condition and ")" in condition:
+            or_part = condition[condition.index("(")+1:condition.index(")")]
+            field = condition.split(":")[0].strip()
+            or_values = [v.strip() for v in or_part.split(" OR ")]
+            log_value = get_nested_value(log, field)
+            if log_value is None:
                 return False
-            log_value = str(log[key])  # Chuyển giá trị log thành string
-            if "*" in value:  # Hỗ trợ wildcard
-                value = value.replace("*", "")  # Bỏ * để so sánh đơn giản
+            matched = False
+            for value in or_values:
+                value = value.strip('"')
+                if "*" in value:
+                    value = value.replace("*", "")
+                    if value in log_value:
+                        matched = True
+                        break
+                elif value == log_value:
+                    matched = True
+                    break
+            if not matched:
+                print(f"No match for OR condition '{field}:({or_part})' in log value '{log_value}'")
+                return False
+        # Điều kiện đơn giản
+        elif ":" in condition:
+            key, value = condition.split(":")
+            value = value.strip('"')
+            log_value = get_nested_value(log, key)
+            if log_value is None:
+                return False
+            if "*" in value:
+                value = value.replace("*", "")
                 if value not in log_value:
-                    print(f"Value '{value}' not in log value '{log_value}'")
+                    print(f"Value '{value}' not in log value '{log_value}' for field '{key}'")
                     return False
             elif log_value != value:
-                print(f"Log value '{log_value}' does not match query value '{value}'")
+                print(f"Log value '{log_value}' does not match query value '{value}' for field '{key}'")
                 return False
     return True
 
