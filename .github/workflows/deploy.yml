@@ -74,4 +74,4 @@ jobs:
           git commit -m "Merge passed Sigma rules from dev to main"
           git push origin main
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
