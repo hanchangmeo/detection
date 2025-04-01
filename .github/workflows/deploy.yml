@@ -9,9 +9,8 @@ on:
       - dev
 
 jobs:
-  validate-and-deploy:
+  validate-rules:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,51 +24,78 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Validate Sigma Rules
-        run: |
-          python ci-scripts/validate_rules.py
+        run: python ci-scripts/validate_rules.py
 
-   #   - name: Convert Sigma Rules to Elasticsearch Queries
-    #    run: |
-     #     python ci-scripts/convert_rules.py rules/ test/ queries/
+  test-rules:
+    runs-on: ubuntu-latest
+    needs: validate-rules  # Chạy sau khi validate-rules hoàn thành
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with: 
+          ref: dev
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Test Sigma Rules with Sample Logs
-        run: |
-          python ci-scripts/test_sigma_rules.py rules/ test/
-        # Nếu không pass, pipeline dừng lại
+        run: python ci-scripts/test_sigma_rules.py rules/ test/
+
+      - name: Upload Passed Rules List
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: passed-rules
+          path: passed_rules.txt
+
+  deploy-rules:
+    runs-on: ubuntu-latest
+    needs: test-rules  # Chạy sau khi test-rules hoàn thành
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with: 
+          ref: dev
+          fetch-depth: 0
+
+      - name: Download Passed Rules List
+        uses: actions/download-artifact@v3
+        with:
+          name: passed-rules
+          path: .
 
       - name: Merge Passed Rules to Main
-        if: success()
         run: |
-          # Clone nhánh main
           git clone https://github.com/hanchangmeo/detection.git
           git config --global user.name "hanchangmeo"
           git config --global user.email "hanchiangzo@gmail.com"
           git checkout main
 
-          # Fetch nhánh dev để truy cập các rule
           git fetch origin
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
             exit 1
           fi         
 
-          # Merge chỉ các rule đã pass từ dev
           while IFS= read -r rule; do
             git checkout origin/dev -- "rules/$rule"
           done < passed_rules.txt
 
-          # Kiểm tra thay đổi
           git status
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
             exit 0
           fi
 
-          # Commit và push
           git add rules/
           git commit -m "Merge passed Sigma rules from dev to main"
           git push origin main
