@@ -17,7 +17,5 @@
     "port": 2222
   },
   "@timestamp": "2025-03-26T14:20:45.678Z",
-  "EventID": 1,
-  "EventAction": "start",
   "message": "Process start detected: scp transferring file to 192.168.1.10 on port 2222"
 }
