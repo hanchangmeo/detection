@@ -51,6 +51,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with: 
+          ref: main
 
       - name: Download Passed Rules Artifact
         uses: actions/download-artifact@v4
@@ -60,12 +62,14 @@ jobs:
       - name: Merge Passed Rules to Main
         run: |
           # Clone nhánh main
-          git clone https://github.com/hanchangmeo/detection.git
+          
           git config --global user.name "hanchangmeo"
           git config --global user.email "hanchiangzo@gmail.com"
-          git checkout main
-
+          git fetch origin main  
+          
           # Fetch nhánh dev để truy cập các rule
+          git checkout main
+          git pull origin main
           git fetch origin
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
