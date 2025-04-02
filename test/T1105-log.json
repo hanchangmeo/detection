@@ -1,9 +1,9 @@
 {
-  "Process": {
-    "Name": "rsync",
+  "process": {
+    "name": "rsync",
     "pid": 12345,
     "executable": "/usr/bin/rsync",
-    "CommandLine": "rsync -r /tmp/adversary-rsync/ victim@victim-host:/tmp/victim-files"
+    "commandline": "rsync -r /tmp/adversary-rsync/ victim@victim-host:/tmp/victim-files"
   },
   "host": {
     "name": "attacker-host"
