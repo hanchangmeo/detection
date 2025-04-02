@@ -1,0 +1,26 @@
+title: Suspicious rsync Remote File Copy (Push)
+id: 0fc6e977-cb12-44f6-b263-2824ba917409
+description: Detects the use of rsync to perform a remote file copy (push) operation.
+status: experimental
+logsource:
+  product: linux
+  service: process_creation
+detection:
+  selection:
+    process.commandline|contains:
+      - "-r"           
+      - "@"
+      - ":"
+  condition: selection
+fields:
+  - ProcessName
+  - CommandLine
+  - User
+  - Hostname
+  - DestinationIp
+  - DestinationPort
+level: medium
+tags:
+  - attack.t1105.001
+  - attack.execution
+  - attack.lateral_movement
