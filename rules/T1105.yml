@@ -7,8 +7,8 @@ logsource:
   service: process_creation
 detection:
   selection:
-    ProcessName: "rsync"
-    CommandLine|contains:
+    Process.Name: "rsync"
+    Process.CommandLine|contains:
       - "-r"           
       - "@"
       - ":"
