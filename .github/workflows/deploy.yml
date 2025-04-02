@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: 
           ref: dev
           fetch-depth: 0
@@ -40,7 +40,7 @@ jobs:
     needs: validate-rules  # Chạy sau khi validate-rules hoàn thành
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: 
           ref: dev
           fetch-depth: 0
