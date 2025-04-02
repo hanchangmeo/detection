@@ -1,26 +1,17 @@
-title: Suspicious File Transfer Tools Usage
-id: 6a7e1b3e-d1f8-42a6-abe3-835f07db6c6e
-description: Detects the usage of scp, rsync, wget, or curl with suspicious parameters indicative of file transfer activity.
+title: Suspicious rsync Remote File Copy (Push)
+id: 0fc6e977-cb12-44f6-b263-2824ba917409
+description: Detects the use of rsync to perform a remote file copy (push) operation.
 status: experimental
 logsource:
   product: linux
   service: process_creation
 detection:
   selection:
-    ProcessName:
-      - "scp"
-      - "rsync"
-      - "wget"
-      - "curl"
+    ProcessName: "rsync"
     CommandLine|contains:
-      - "--server"
-      - "--sender"
-      - "-P"  # scp custom port
-      - "-e"  # rsync custom SSH command
-      - "-O"  # wget output file
-      - "-o"  # curl output file
-      - "http://"  # Optional for wget/curl
-      - "https://" # Optional for wget/curl
+      - "-r"           
+      - "@"
+      - ":"
   condition: selection
 fields:
   - ProcessName
@@ -31,6 +22,6 @@ fields:
   - DestinationPort
 level: medium
 tags:
-  - attack.t1105
+  - attack.t1105.001
   - attack.execution
   - attack.lateral_movement
