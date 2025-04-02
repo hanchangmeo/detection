@@ -7,8 +7,6 @@ logsource:
   service: process_creation
 detection:
   selection:
-    EventID: 1
-    EventAction: "start"
     ProcessName:
       - "scp"
       - "rsync"
@@ -19,9 +17,12 @@ detection:
       - "https://"
       - "--server"
       - "--sender"
+      - "-P"  # scp custom port
+      - "-e"  # rsync custom SSH command
+      - "-O"  # wget output file
+      - "-o"  # curl output file
   condition: selection
 fields:
-  - EventID
   - ProcessName
   - CommandLine
   - User
@@ -33,4 +34,3 @@ tags:
   - attack.t1105
   - attack.execution
   - attack.lateral_movement
-
