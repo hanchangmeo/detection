@@ -13,14 +13,14 @@ detection:
       - "wget"
       - "curl"
     CommandLine|contains:
-      - "http://"
-      - "https://"
       - "--server"
       - "--sender"
       - "-P"  # scp custom port
       - "-e"  # rsync custom SSH command
       - "-O"  # wget output file
       - "-o"  # curl output file
+      - "http://"  # Optional for wget/curl
+      - "https://" # Optional for wget/curl
   condition: selection
 fields:
   - ProcessName
