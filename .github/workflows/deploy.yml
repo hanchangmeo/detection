@@ -5,20 +5,20 @@ on:
     branches:
       - dev
     paths:
-      - "rules**"
+      - 'rules/**'
   pull_request:
     branches:
       - dev
     paths:
-      - "rules/**"
+      - 'rules/**'
 
 jobs:
-  validate-rules:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        with: 
+        uses: actions/checkout@v3
+        with:
           ref: dev
           fetch-depth: 0
 
@@ -33,15 +33,13 @@ jobs:
       - name: Validate Sigma Rules
         run: python ci-scripts/validate_rules.py
 
-    
-
-  test-rules:
+  test_rules:
+    needs: validate
     runs-on: ubuntu-latest
-    needs: validate-rules  # Chạy sau khi validate-rules hoàn thành
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        with: 
+        uses: actions/checkout@v3
+        with:
           ref: dev
           fetch-depth: 0
 
@@ -56,49 +54,31 @@ jobs:
       - name: Test Sigma Rules with Sample Logs
         run: python ci-scripts/test_sigma_rules.py rules/ test/
 
-      - name: Check if pased_rules.txt is empty
-        run: |
-          if [ ! -s passed_rules.txt ]; then
-            echo "No rules passed. Stopping pipeline."
-            exit 0
-          fi
-
-      - name: Upload Passed Rules List
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: passed-rules
-          path: passed_rules.txt
-
-  deploy-rules:
-    needs: test-rules  # Chạy sau khi test-rules hoàn thành
+  merge_passed_rules:
+    needs: [validate, test_rules]
     runs-on: ubuntu-latest
     if: success()
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-        with: 
-          ref: dev
+        uses: actions/checkout@v3
+        with:
+          ref: main
           fetch-depth: 0
 
-      - name: Download Passed Rules List
-        uses: actions/download-artifact@v4
-        with:
-          name: passed-rules
-          path: .
+      - name: Set up Git
+        run: |
+          git config --global user.name "hanchangmeo"
+          git config --global user.email "hanchiangzo@gmail.com"
+
+      - name: Fetch dev branch
+        run: git fetch origin dev
 
       - name: Merge Passed Rules to Main
         run: |
-          git clone https://github.com/hanchangmeo/detection.git
-          git config --global user.name "hanchangmeo"
-          git config --global user.email "hanchiangzo@gmail.com"
-          git checkout main
-
-          git fetch origin
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
             exit 1
-          fi         
+          fi
 
           while IFS= read -r rule; do
             git checkout origin/dev -- "rules/$rule"
