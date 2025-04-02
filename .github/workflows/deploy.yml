@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload Passed Rules for Next Job
         if: success()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: passed-rules
           path: passed_rules.txt
@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download Passed Rules Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: passed-rules
 
