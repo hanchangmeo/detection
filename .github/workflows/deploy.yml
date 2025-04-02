@@ -61,7 +61,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: passed-rules
-
+          path: passed_rules.txt
       - name: Merge Passed Rules to Main
         run: |
           # Clone nhánh main
@@ -72,8 +72,11 @@ jobs:
           
           # Fetch nhánh dev để truy cập các rule
           git checkout main
-          git pull origin main
+          git pull origin main 
+          git checkout dev
+          git pull origin dev
           git fetch origin
+          
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
             exit 1
