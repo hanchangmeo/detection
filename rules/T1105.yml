@@ -8,6 +8,7 @@ logsource:
 detection:
   selection:
     EventID: 1
+    EventAction: "start"
     ProcessName:
       - "scp"
       - "rsync"
