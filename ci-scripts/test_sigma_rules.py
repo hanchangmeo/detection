@@ -120,6 +120,12 @@ if not passed_rules:
 
 print(f"Passed rules: {passed_rules}")
 
+if passed_rules:
+    print("Passed rules:")
+    for rule in passed_rules:
+        print(f"- {rule}")
+else:
+    print("No rules passed.")
 # Ghi danh sách rule pass vào file
 with open("passed_rules.txt", "w") as f:
     for rule in passed_rules:
