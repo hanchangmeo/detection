@@ -4,21 +4,18 @@ on:
   push:
     branches:
       - dev
-    paths:
-      - 'rules/**'
   pull_request:
     branches:
       - dev
-    paths:
-      - 'rules/**'
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
+        with: 
           ref: dev
           fetch-depth: 0
 
@@ -28,68 +25,66 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
       - name: Validate Sigma Rules
-        run: python ci-scripts/validate_rules.py
-
-  test_rules:
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          ref: dev
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python ci-scripts/validate_rules.py
 
       - name: Test Sigma Rules with Sample Logs
-        run: python ci-scripts/test_sigma_rules.py rules/ test/
+        run: |
+          python ci-scripts/test_sigma_rules.py rules/ test/
+        # Nếu không pass, pipeline dừng lại
 
-  merge_passed_rules:
-    needs: [validate, test_rules]
+      - name: Upload Passed Rules for Next Job
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: passed-rules
+          path: passed_rules.txt
+
+  merge:
     runs-on: ubuntu-latest
-    if: success()
+    needs: validate  # Merge chỉ khi job validate thành công
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Download Passed Rules Artifact
+        uses: actions/download-artifact@v3
         with:
-          ref: main
-          fetch-depth: 0
-
-      - name: Set up Git
-        run: |
-          git config --global user.name "hanchangmeo"
-          git config --global user.email "hanchiangzo@gmail.com"
-
-      - name: Fetch dev branch
-        run: git fetch origin dev
+          name: passed-rules
 
       - name: Merge Passed Rules to Main
         run: |
+          # Clone nhánh main
+          git clone https://github.com/hanchangmeo/detection.git
+          git config --global user.name "hanchangmeo"
+          git config --global user.email "hanchiangzo@gmail.com"
+          git checkout main
+
+          # Fetch nhánh dev để truy cập các rule
+          git fetch origin
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
             exit 1
-          fi
+          fi         
 
+          # Merge chỉ các rule đã pass từ dev
           while IFS= read -r rule; do
             git checkout origin/dev -- "rules/$rule"
           done < passed_rules.txt
 
+          # Kiểm tra thay đổi
           git status
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
             exit 0
           fi
 
+          # Commit và push
           git add rules/
           git commit -m "Merge passed Sigma rules from dev to main"
           git push origin main
