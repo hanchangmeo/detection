@@ -58,7 +58,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: passed-rules
-          path: passed_rules.txt
+      - name: Display structure of download files
+        run: ls -R
       - name: Fetch all branches
         run: git fetch --all
 
@@ -67,6 +68,9 @@ jobs:
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
             exit 1
+          else
+            echo "file found. Reading:"
+            cat passed_rules.txt
           fi         
 
           git config --global user.name "hanchangmeo"
