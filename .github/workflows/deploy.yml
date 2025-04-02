@@ -54,6 +54,9 @@ jobs:
         with: 
           fetch-depth: 0
 
+      - name: Fetch all branches
+        run: git fetch --all
+
       - name: Download Passed Rules Artifact
         uses: actions/download-artifact@v4
         with:
