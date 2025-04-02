@@ -53,38 +53,39 @@ jobs:
         uses: actions/checkout@v3
         with: 
           fetch-depth: 0
-
-      - name: Fetch all branches
-        run: git fetch --all
-
+          
       - name: Download Passed Rules Artifact
         uses: actions/download-artifact@v4
         with:
           name: passed-rules
           path: passed_rules.txt
+      - name: Fetch all branches
+        run: git fetch --all
+
       - name: Merge Passed Rules to Main
         run: |
-          # Clone nhánh main
-          
-          git config --global user.name "hanchangmeo"
-          git config --global user.email "hanchiangzo@gmail.com"
-          git fetch origin main  
-          
-          # Fetch nhánh dev để truy cập các rule
-          git checkout main
-          git pull origin main 
-          git checkout dev
-          git pull origin dev
-          git fetch origin
-          
           if [ ! -f "passed_rules.txt" ]; then
             echo "Error: passed_rules.txt not found!"
             exit 1
           fi         
 
+          git config --global user.name "hanchangmeo"
+          git config --global user.email "hanchiangzo@gmail.com"
+          
+          git fetch origin main  
+          git checkout main
+          git pull origin main 
+          
+          git checkout dev
+          git pull origin dev
+          git fetch origin
+
+          git checkout main
+
           # Merge chỉ các rule đã pass từ dev
           while IFS= read -r rule; do
-            git checkout origin/dev -- "rules/$rule"
+            echo "Merging rule: $rule"
+            git checkout dev -- "rules/$rule"
           done < passed_rules.txt
 
           # Kiểm tra thay đổi
