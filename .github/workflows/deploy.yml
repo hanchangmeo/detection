@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - dev
+    paths:
+      - "rules**"
   pull_request:
     branches:
       - dev
+    paths:
+      - "rules/**"
 
 jobs:
   validate-rules:
@@ -29,6 +33,8 @@ jobs:
       - name: Validate Sigma Rules
         run: python ci-scripts/validate_rules.py
 
+    
+
   test-rules:
     runs-on: ubuntu-latest
     needs: validate-rules  # Chạy sau khi validate-rules hoàn thành
@@ -50,6 +56,13 @@ jobs:
       - name: Test Sigma Rules with Sample Logs
         run: python ci-scripts/test_sigma_rules.py rules/ test/
 
+      - name: Check if pased_rules.txt is empty
+        run: |
+          if [ ! -s passed_rules.txt ]; then
+            echo "No rules passed. Stopping pipeline."
+            exit 0
+          fi
+
       - name: Upload Passed Rules List
         if: success()
         uses: actions/upload-artifact@v3
@@ -58,8 +71,9 @@ jobs:
           path: passed_rules.txt
 
   deploy-rules:
-    runs-on: ubuntu-latest
     needs: test-rules  # Chạy sau khi test-rules hoàn thành
+    runs-on: ubuntu-latest
+    if: success()
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
