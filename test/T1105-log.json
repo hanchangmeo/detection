@@ -1,0 +1,21 @@
+{
+  "process": {
+    "name": "rsync",
+    "pid": 12345,
+    "executable": "/usr/bin/rsync",
+    "commandline": "rsync -r /tmp/adversary-rsync/ victim@victim-host:/tmp/victim-files"
+  },
+  "host": {
+    "name": "attacker-host"
+  },
+  "user": {
+    "name": "attacker",
+    "id": "1001"
+  },
+  "destination": {
+    "ip": "192.168.1.20",
+    "port": 22
+  },
+  "@timestamp": "2025-04-02T10:15:30.123Z",
+  "message": "Process start detected: rsync transferring file to victim-host at /tmp/victim-files"
+}
