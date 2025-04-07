@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from sigma.parser.collection import SigmaCollection
-from sigma.backends.resolver import DefaultResolvers
+from sigma.backends.elasticsearch import LuceneBackend
 
 # Lấy biến môi trường Elastic (Kibana) URL và API Key
 KIBANA_URL = os.getenv("ELASTIC_URL")      # Ví dụ: https://your-deployment.kb.us-central1.gcp.cloud.es.io
@@ -19,8 +19,8 @@ HEADERS = {
 
 def parse_metadata(rule_dict, rule_path):
     """
-    Hàm này lấy thông tin metadata từ rule Sigma (dạng dictionary) và file path,
-    sau đó trả về dictionary chứa metadata cần thiết cho Elastic Detection rule.
+    Lấy thông tin metadata từ rule Sigma (dạng dictionary) và file path,
+    trả về dictionary chứa metadata cần thiết cho Elastic Detection rule.
     """
     return {
         "name": rule_dict.get("title", os.path.basename(rule_path)),
@@ -33,11 +33,10 @@ def parse_metadata(rule_dict, rule_path):
 
 def deploy_rule(rule_path):
     """
-    Hàm deploy_rule:
-    - Đọc file rule Sigma từ rule_path
-    - Convert rule Sigma sang query (KQL) dùng backend "kibana-kuery"
-    - Tạo payload theo định dạng Elastic Detection rule
-    - Gọi API của Kibana để deploy rule
+    - Đọc file rule Sigma từ rule_path.
+    - Chuyển đổi rule Sigma sang câu truy vấn Lucene dùng LuceneBackend.
+    - Tạo payload theo định dạng Elastic Detection rule.
+    - Gọi API của Kibana để deploy rule.
     """
     with open(rule_path, "r", encoding="utf-8") as f:
         rule_yaml = f.read()
@@ -45,8 +44,8 @@ def deploy_rule(rule_path):
     # Parse rule Sigma từ YAML
     collection = SigmaCollection.from_yaml(rule_yaml)
     
-    # Lấy backend chuyển Sigma sang query cho Kibana (sử dụng Kibana Query Language - KQL)
-    backend = DefaultResolvers.get("kibana-kuery")
+    # Sử dụng LuceneBackend để chuyển rule Sigma sang Lucene query
+    backend = LuceneBackend()  # Default output là Lucene queries
     queries = list(collection.convert(backend))
     
     if not queries:
@@ -63,7 +62,7 @@ def deploy_rule(rule_path):
         **metadata,
         "type": "query",
         "index": ["logs-*"],
-        "language": "kuery",
+        "language": "lucene",  # Dùng ngôn ngữ lucene
         "query": query,
         "interval": "5m",
         "from": "now-6m",
