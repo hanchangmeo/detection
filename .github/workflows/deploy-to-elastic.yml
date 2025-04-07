@@ -1,0 +1,30 @@
+name: Deploy Sigma Rules to Elastic
+
+on:
+  push:
+    branches: [dev]                
+    paths:
+      - 'passed_rules.txt'         
+  workflow_dispatch:               
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name:  Deploy passed Sigma rules to Elastic
+        run: python ci-scripts/deploy_to_elastic.py
+        env:
+          ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
+          ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
