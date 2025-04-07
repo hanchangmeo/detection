@@ -2,9 +2,9 @@ import os
 import json
 import requests
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.elasticsearch_kibana import KibanaBackend as KibanaQueryBackend
+from sigma.resolver import BackendResolver
 
-KIBANA_URL = os.getenv("ELASTIC_URL")  # VD: https://your-deployment.kb.us-central1.gcp.cloud.es.io
+KIBANA_URL = os.getenv("ELASTIC_URL")  # Ví dụ: https://your-deployment.kb.us-central1.gcp.cloud.es.io
 KIBANA_TOKEN = os.getenv("ELASTIC_API_KEY")  # Elastic Cloud API Key
 RULES_DIR = "rules"
 PASSED_RULES_FILE = "passed_rules.txt"
@@ -29,8 +29,11 @@ def deploy_rule(rule_path):
     with open(rule_path, "r", encoding="utf-8") as f:
         rule_yaml = f.read()
 
+    # Parse rule Sigma từ file YAML
     collection = SigmaCollection.from_yaml(rule_yaml)
-    backend = KibanaQueryBackend()
+    # Sử dụng BackendResolver để lấy backend chuyển Sigma thành query cho Elastic (KQL)
+    resolver = BackendResolver.default()
+    backend = resolver.resolve("elasticsearch/kibana")
     queries = list(collection.to_query(backend))
 
     if not queries:
@@ -56,13 +59,13 @@ def deploy_rule(rule_path):
     response = requests.post(url, headers=HEADERS, json=payload)
 
     if response.status_code in [200, 201]:
-        print(f" Đã deploy rule: {metadata['name']}")
+        print(f"Đã deploy rule: {metadata['name']}")
     else:
-        print(f" Lỗi khi deploy {rule_path}:\n{response.text}")
+        print(f"Lỗi khi deploy {rule_path}:\n{response.status_code} - {response.text}")
 
 def main():
     if not os.path.exists(PASSED_RULES_FILE):
-        print(" Không tìm thấy passed_rules.txt")
+        print("Không tìm thấy passed_rules.txt")
         return
 
     with open(PASSED_RULES_FILE, "r") as f:
@@ -73,10 +76,10 @@ def main():
         if os.path.exists(rule_path):
             deploy_rule(rule_path)
         else:
-            print(f" Không tìm thấy rule: {rule_path}")
+            print(f"Không tìm thấy rule: {rule_path}")
 
 if __name__ == "__main__":
     if not KIBANA_URL or not KIBANA_TOKEN:
-        print(" Thiếu biến ELASTIC_URL hoặc ELASTIC_API_KEY")
+        print("Thiếu biến ELASTIC_URL hoặc ELASTIC_API_KEY")
         exit(1)
     main()
