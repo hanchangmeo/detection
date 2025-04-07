@@ -1,14 +1,16 @@
 import os
 import json
 import requests
-from sigma.collection import SigmaCollection
-from sigma.resolver import BackendResolver
+from sigma.parser.collection import SigmaCollection
+from sigma.backends.resolver import DefaultResolvers
 
-KIBANA_URL = os.getenv("ELASTIC_URL")  # Ví dụ: https://your-deployment.kb.us-central1.gcp.cloud.es.io
+# Lấy biến môi trường Elastic (Kibana) URL và API Key
+KIBANA_URL = os.getenv("ELASTIC_URL")      # Ví dụ: https://your-deployment.kb.us-central1.gcp.cloud.es.io
 KIBANA_TOKEN = os.getenv("ELASTIC_API_KEY")  # Elastic Cloud API Key
 RULES_DIR = "rules"
 PASSED_RULES_FILE = "passed_rules.txt"
 
+# Header dùng để gọi API Kibana Detection Engine
 HEADERS = {
     "Content-Type": "application/json",
     "kbn-xsrf": "true",
@@ -16,6 +18,10 @@ HEADERS = {
 }
 
 def parse_metadata(rule_dict, rule_path):
+    """
+    Hàm này lấy thông tin metadata từ rule Sigma (dạng dictionary) và file path,
+    sau đó trả về dictionary chứa metadata cần thiết cho Elastic Detection rule.
+    """
     return {
         "name": rule_dict.get("title", os.path.basename(rule_path)),
         "description": rule_dict.get("description", "No description."),
@@ -26,24 +32,33 @@ def parse_metadata(rule_dict, rule_path):
     }
 
 def deploy_rule(rule_path):
+    """
+    Hàm deploy_rule:
+    - Đọc file rule Sigma từ rule_path
+    - Convert rule Sigma sang query (KQL) dùng backend "kibana-kuery"
+    - Tạo payload theo định dạng Elastic Detection rule
+    - Gọi API của Kibana để deploy rule
+    """
     with open(rule_path, "r", encoding="utf-8") as f:
         rule_yaml = f.read()
 
-    # Parse rule Sigma từ file YAML
+    # Parse rule Sigma từ YAML
     collection = SigmaCollection.from_yaml(rule_yaml)
-    # Sử dụng BackendResolver để lấy backend chuyển Sigma thành query cho Elastic (KQL)
-    resolver = BackendResolver.default()
-    backend = resolver.resolve("elasticsearch/kibana")
-    queries = list(collection.to_query(backend))
-
+    
+    # Lấy backend chuyển Sigma sang query cho Kibana (sử dụng Kibana Query Language - KQL)
+    backend = DefaultResolvers.get("kibana-kuery")
+    queries = list(collection.convert(backend))
+    
     if not queries:
         print(f"Không tạo được query cho {rule_path}")
         return
 
     query = queries[0]
+    # Lấy rule dictionary đã được parse
     rule = collection.parsedyaml[0]
     metadata = parse_metadata(rule, rule_path)
 
+    # Tạo payload cho API của Kibana Detection Engine
     payload = {
         **metadata,
         "type": "query",
