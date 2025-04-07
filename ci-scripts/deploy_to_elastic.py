@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.kibana import KibanaQueryBackend
+from sigma.backends.elasticsearch.elasticsearch_kibana import KibanaBackend as KibanaQueryBackend
 
 KIBANA_URL = os.getenv("ELASTIC_URL")  # VD: https://your-deployment.kb.us-central1.gcp.cloud.es.io
 KIBANA_TOKEN = os.getenv("ELASTIC_API_KEY")  # Elastic Cloud API Key
