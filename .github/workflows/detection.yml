@@ -1,6 +1,12 @@
 name: Detection-as-Code Alert
 
 on:
+  push:
+    branches: [dev]
+    paths:
+      - 'rules/**'
+      - 'ci-script/**'
+      - 'requirementx.txt'
   workflow_dispatch:  # Cho phép chạy thủ công từ GitHub UI
   schedule:
     - cron: '*/10 * * * *'  # Chạy mỗi 10 phút (tuỳ chỉnh)
