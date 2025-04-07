@@ -1,0 +1,9 @@
+{
+  "process": {
+    "command_line": "python -c 'import requests; os.system(\"malicious_command\")'",
+    "parent_name": "bash",
+    "user": {
+      "name": "root"
+    }
+  }
+}
