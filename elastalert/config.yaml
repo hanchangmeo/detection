@@ -14,7 +14,13 @@ buffer_time:
 alert_time_limit:
   days: 1
 
-verbose: true
 logging:
-  level: INFO
-  log_file: elastalert.log
+  version: 1
+  disable_existing_loggers: false
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+  root:
+    handlers: [console]
+    level: INFO
