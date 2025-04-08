@@ -31,4 +31,4 @@ jobs:
           ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
           EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
         run: |
-          python detection/ci-scripts/detect_and_alert.py
+          python ci-scripts/detect_and_alert.py
