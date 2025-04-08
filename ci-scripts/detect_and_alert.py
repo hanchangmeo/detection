@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.elasticsearch_elastalert import ElastalertBackend
+from sigma.backends.elastalert import ElastalertBackend
 from sigma.configuration import SigmaConfiguration
 
 from elasticsearch import Elasticsearch
