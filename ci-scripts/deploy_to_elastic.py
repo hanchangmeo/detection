@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from sigma.parser.collection import SigmaCollection
+from sigma.collection import SigmaCollection
 from sigma.backends.elasticsearch import LuceneBackend
 
 # Lấy biến môi trường Elastic (Kibana) URL và API Key
