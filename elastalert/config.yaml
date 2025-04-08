@@ -1,1 +1,20 @@
-a
+es_host: ${ELASTIC_HOST}
+es_port: 443
+use_ssl: true
+es_api_key: ${ELASTIC_API_KEY}
+
+writeback_index: elastalert_status
+rules_folder: rules
+
+run_every:
+  minutes: 1
+buffer_time:
+  minutes: 15
+
+alert_time_limit:
+  days: 1
+
+verbose: true
+logging:
+  level: INFO
+  log_file: elastalert.log
