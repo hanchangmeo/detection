@@ -6,12 +6,12 @@ alert:
   - email
 
 email:
-  - hachiangzo@gmail.com   # 📝 Thay bằng email thật
+  - hachangmeo@gmail.com   
 
 smtp_host: smtp.gmail.com
 smtp_port: 587
 smtp_ssl: false
-from_addr: your_email@gmail.com
+from_addr: hanchiangzo@gmail.com
 smtp_auth_file: smtp_auth.yaml
 
 filter:
