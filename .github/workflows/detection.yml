@@ -1,0 +1,37 @@
+name: Detection-as-Code Alert
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'rules/**'
+      - 'ci-script/**'
+      - 'requirements.txt'
+  workflow_dispatch:  # Cho phép chạy thủ công từ GitHub UI
+  schedule:
+    - cron: '*/10 * * * *'  # Chạy mỗi 10 phút (tuỳ chỉnh)
+
+jobs:
+  detect-and-alert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name:  Checkout repo
+        uses: actions/checkout@v3
+
+      - name:  Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name:  Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name:  Run detection script
+        run: |
+          python ci-scripts/detect_and_alert.py
+        env:
+          ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
+          ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
