@@ -6,7 +6,7 @@ on:
     paths:
       - 'rules/**'
       - 'ci-script/**'
-      - 'requirementx.txt'
+      - 'requirements.txt'
   workflow_dispatch:  # Cho phép chạy thủ công từ GitHub UI
   schedule:
     - cron: '*/10 * * * *'  # Chạy mỗi 10 phút (tuỳ chỉnh)
