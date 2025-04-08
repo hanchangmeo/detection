@@ -1,66 +1,59 @@
 import os
 import json
-import time
 from datetime import datetime, timedelta
-
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.elasticsearch_elastalert import ElastalertBackend
-from sigma.configuration import SigmaConfiguration
+from sigma.backends.elasticsearch.elasticsearch_querystring import ElasticsearchQuerystringBackend
+from sigma.config.elasticsearch import elasticsearch_config
 
 from elasticsearch import Elasticsearch
-import requests
 import smtplib
 from email.mime.text import MIMEText
 
 # === CẤU HÌNH ===
-
-ELASTIC_URL = os.getenv("ELASTIC_URL")  # VD: https://xxxx.es.us-central1.gcp.cloud.es.io
+ELASTIC_URL = os.getenv("ELASTIC_URL")
 ELASTIC_API_KEY = os.getenv("ELASTIC_API_KEY")
-EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")  # App Password của Gmail
+EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 
 FROM_EMAIL = "hanchiangzo@gmail.com"
 TO_EMAIL = "hanchiangzo@gmail.com"
 
+INDEX_PATTERN = os.getenv("INDEX_PATTERN", "logs-*")
 RULES_DIR = "rules"
+MAX_ALERT_LOGS = 3
 
-# === KHỞI TẠO KẾT NỐI ===
-
+# === KẾT NỐI ES 8 ===
 es = Elasticsearch(ELASTIC_URL, api_key=ELASTIC_API_KEY)
 
-# === CÁC HÀM XỬ LÝ ===
-
+# === HÀM EMAIL ===
 def send_email_alert(subject, body):
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = FROM_EMAIL
     msg["To"] = TO_EMAIL
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(FROM_EMAIL, EMAIL_APP_PASSWORD)
             server.send_message(msg)
-            print(f"Email alert sent to {TO_EMAIL}")
+            print(f"📧 Email sent to {TO_EMAIL}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"❌ Email failed: {e}")
 
-
+# === LOAD RULE ===
 def load_sigma_rules():
-    for rule_file in os.listdir(RULES_DIR):
-        if rule_file.endswith(".yml"):
-            path = os.path.join(RULES_DIR, rule_file)
-            with open(path, "r", encoding="utf-8") as f:
-                yield rule_file, SigmaCollection.from_yaml(f.read())
+    for file in os.listdir(RULES_DIR):
+        if file.endswith(".yml") or file.endswith(".yaml"):
+            with open(os.path.join(RULES_DIR, file), "r") as f:
+                yield file, SigmaCollection.from_yaml(f.read())
 
+# === CONVERT RULE → QUERY ===
 def convert_to_query(collection):
-    config = SigmaConfiguration()
-    backend = ElastalertBackend(config)
+    backend = ElasticsearchQuerystringBackend(elasticsearch_config)
     return backend.convert(collection)[0]
 
-def query_elasticsearch(query_string, index="logs-*", timeframe_minutes=5):
+# === SEARCH ===
+def query_elasticsearch(query_string, timeframe_minutes=5):
     now = datetime.utcnow()
     start = now - timedelta(minutes=timeframe_minutes)
 
@@ -69,42 +62,41 @@ def query_elasticsearch(query_string, index="logs-*", timeframe_minutes=5):
             "bool": {
                 "must": [
                     {"query_string": {"query": query_string}},
-                    {"range": {"@timestamp": {
-                        "gte": start.isoformat(),
-                        "lte": now.isoformat()
-                    }}}
+                    {"range": {
+                        "@timestamp": {
+                            "gte": start.isoformat(),
+                            "lte": now.isoformat()
+                        }
+                    }}
                 ]
             }
         }
     }
 
-    res = es.search(index=index, body=query, size=10)
+    res = es.search(index=INDEX_PATTERN, body=query, size=MAX_ALERT_LOGS)
     return res.get("hits", {}).get("hits", [])
 
+# === MAIN ===
 def main():
-    print("Detection-as-Code service with Email Alert")
+    print("🚨 Running Detection-as-Code...")
 
     for rule_name, collection in load_sigma_rules():
         try:
             query_string = convert_to_query(collection)
-            print(f"Converted {rule_name} to query: {query_string}")
+            print(f"🔎 Rule: {rule_name} → {query_string}")
 
             results = query_elasticsearch(query_string)
             if results:
-                print(f"MATCH: {rule_name}")
-                log_sample = json.dumps(results[0]["_source"], indent=2)
-                subject = f"[Detection] Rule matched: {rule_name}"
-                body = f"Matched log:\n\n{log_sample}"
-                send_email_alert(subject, body)
+                print(f"✅ MATCH: {rule_name}")
+                logs = "\n---\n".join(json.dumps(hit["_source"], indent=2) for hit in results)
+                send_email_alert(f"[Detection] {rule_name} matched", logs)
             else:
-                print(f"No match: {rule_name}")
-
+                print(f"❌ No match: {rule_name}")
         except Exception as e:
-            print(f"Error with {rule_name}: {e}")
+            print(f"⚠️ Error in {rule_name}: {e}")
 
 if __name__ == "__main__":
     if not ELASTIC_URL or not ELASTIC_API_KEY or not EMAIL_APP_PASSWORD:
-        print("Missing environment variables!")
-        print("Cần ELASTIC_URL, ELASTIC_API_KEY và EMAIL_APP_PASSWORD")
+        print("❌ Missing environment variables!")
         exit(1)
     main()
