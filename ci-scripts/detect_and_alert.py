@@ -2,8 +2,8 @@ import os
 import json
 from datetime import datetime, timedelta
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.elasticsearch_elastalert import ElastalertBackend
-from sigma.config.elasticsearch import elasticsearch_config
+from sigma.backends.elasticsearch.elasticsearch import ElasticsearchBackend
+from sigma.configuration import default_configuration
 
 from elasticsearch import Elasticsearch
 import smtplib
@@ -24,7 +24,6 @@ MAX_ALERT_LOGS = 3
 # === KẾT NỐI ES 8 ===
 es = Elasticsearch(ELASTIC_URL, api_key=ELASTIC_API_KEY)
 
-# === HÀM EMAIL ===
 def send_email_alert(subject, body):
     msg = MIMEText(body)
     msg["Subject"] = subject
@@ -36,24 +35,20 @@ def send_email_alert(subject, body):
             server.starttls()
             server.login(FROM_EMAIL, EMAIL_APP_PASSWORD)
             server.send_message(msg)
-            print(f"📧 Email sent to {TO_EMAIL}")
+            print(f"Email sent to {TO_EMAIL}")
     except Exception as e:
-        print(f"❌ Email failed: {e}")
+        print(f" Email failed: {e}")
 
-# === LOAD RULE ===
 def load_sigma_rules():
     for file in os.listdir(RULES_DIR):
         if file.endswith(".yml") or file.endswith(".yaml"):
             with open(os.path.join(RULES_DIR, file), "r") as f:
                 yield file, SigmaCollection.from_yaml(f.read())
 
-# === CONVERT RULE → QUERY ===
 def convert_to_query(collection):
-    backend = ElastalertBackend(elasticsearch_config)
-    alerts = backend.convert(collection)
-    return alerts[0]
+    backend = ElasticsearchBackend(default_configuration)
+    return backend.convert(collection)[0]
 
-# === SEARCH ===
 def query_elasticsearch(query_string, timeframe_minutes=5):
     now = datetime.utcnow()
     start = now - timedelta(minutes=timeframe_minutes)
@@ -77,18 +72,17 @@ def query_elasticsearch(query_string, timeframe_minutes=5):
     res = es.search(index=INDEX_PATTERN, body=query, size=MAX_ALERT_LOGS)
     return res.get("hits", {}).get("hits", [])
 
-# === MAIN ===
 def main():
-    print("🚨 Running Detection-as-Code...")
+    print(" Running Detection-as-Code...")
 
     for rule_name, collection in load_sigma_rules():
         try:
             query_string = convert_to_query(collection)
-            print(f"🔎 Rule: {rule_name} → {query_string}")
+            print(f" Rule: {rule_name} → {query_string}")
 
             results = query_elasticsearch(query_string)
             if results:
-                print(f"MATCH: {rule_name}")
+                print(f" MATCH: {rule_name}")
                 logs = "\n---\n".join(json.dumps(hit["_source"], indent=2) for hit in results)
                 send_email_alert(f"[Detection] {rule_name} matched", logs)
             else:
