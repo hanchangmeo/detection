@@ -43,9 +43,9 @@ def send_email_alert(subject, body):
             server.starttls()
             server.login(FROM_EMAIL, EMAIL_APP_PASSWORD)
             server.send_message(msg)
-            print(f"📧 Email alert sent to {TO_EMAIL}")
+            print(f"Email alert sent to {TO_EMAIL}")
     except Exception as e:
-        print(f"❌ Failed to send email: {e}")
+        print(f"Failed to send email: {e}")
 
 
 def load_sigma_rules():
@@ -82,29 +82,29 @@ def query_elasticsearch(query_string, index="logs-*", timeframe_minutes=5):
     return res.get("hits", {}).get("hits", [])
 
 def main():
-    print("🚀 Detection-as-Code service with Email Alert")
+    print("Detection-as-Code service with Email Alert")
 
     for rule_name, collection in load_sigma_rules():
         try:
             query_string = convert_to_query(collection)
-            print(f"🔎 Converted {rule_name} to query: {query_string}")
+            print(f"Converted {rule_name} to query: {query_string}")
 
             results = query_elasticsearch(query_string)
             if results:
-                print(f"✅ MATCH: {rule_name}")
+                print(f"MATCH: {rule_name}")
                 log_sample = json.dumps(results[0]["_source"], indent=2)
                 subject = f"[Detection] Rule matched: {rule_name}"
                 body = f"Matched log:\n\n{log_sample}"
                 send_email_alert(subject, body)
             else:
-                print(f"🚫 No match: {rule_name}")
+                print(f"No match: {rule_name}")
 
         except Exception as e:
-            print(f"❌ Error with {rule_name}: {e}")
+            print(f"Error with {rule_name}: {e}")
 
 if __name__ == "__main__":
     if not ELASTIC_URL or not ELASTIC_API_KEY or not EMAIL_APP_PASSWORD:
-        print("❌ Missing environment variables!")
+        print("Missing environment variables!")
         print("Cần ELASTIC_URL, ELASTIC_API_KEY và EMAIL_APP_PASSWORD")
         exit(1)
     main()
