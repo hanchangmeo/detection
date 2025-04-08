@@ -4,4 +4,3 @@ requests==2.31.0
 pyyaml==6.0.1
 pyparsing==3.0.9
 elasticsearch==8.12.1 
-pysigma-backend-elastalert==0.2.1
