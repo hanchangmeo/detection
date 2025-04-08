@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime, timedelta
 from sigma.collection import SigmaCollection
-from sigma.backends.elasticsearch.elasticsearch_querystring import ElasticsearchQuerystringBackend
+from sigma.backends.elasticsearch.elasticsearch_elastalert import ElastalertBackend
 from sigma.config.elasticsearch import elasticsearch_config
 
 from elasticsearch import Elasticsearch
@@ -49,8 +49,9 @@ def load_sigma_rules():
 
 # === CONVERT RULE → QUERY ===
 def convert_to_query(collection):
-    backend = ElasticsearchQuerystringBackend(elasticsearch_config)
-    return backend.convert(collection)[0]
+    backend = ElastalertBackend(elasticsearch_config)
+    alerts = backend.convert(collection)
+    return alerts[0]
 
 # === SEARCH ===
 def query_elasticsearch(query_string, timeframe_minutes=5):
@@ -87,16 +88,16 @@ def main():
 
             results = query_elasticsearch(query_string)
             if results:
-                print(f"✅ MATCH: {rule_name}")
+                print(f"MATCH: {rule_name}")
                 logs = "\n---\n".join(json.dumps(hit["_source"], indent=2) for hit in results)
                 send_email_alert(f"[Detection] {rule_name} matched", logs)
             else:
-                print(f"❌ No match: {rule_name}")
+                print(f" No match: {rule_name}")
         except Exception as e:
-            print(f"⚠️ Error in {rule_name}: {e}")
+            print(f" Error in {rule_name}: {e}")
 
 if __name__ == "__main__":
     if not ELASTIC_URL or not ELASTIC_API_KEY or not EMAIL_APP_PASSWORD:
-        print("❌ Missing environment variables!")
+        print(" Missing environment variables!")
         exit(1)
     main()
