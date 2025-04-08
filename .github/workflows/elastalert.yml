@@ -1,0 +1,40 @@
+name: Run ElastAlert2
+
+on:
+  push:
+    branches: [ dev ]
+    paths:
+      - 'elastalert/**'
+      - '.github/workflows/elastalert.yml'
+
+jobs:
+  elastalert:
+    runs-on: ubuntu-latest
+
+    env:
+      ELASTIC_HOST: ${{ secrets.ELASTIC_HOST }}
+      ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
+      EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name:  Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name:  Install ElastAlert2
+        run: |
+          pip install elastalert2
+
+      - name:  Generate smtp_auth.yaml from GitHub Secret
+        run: |
+          echo "user: hanchiangzo@gmail.com" > elastalert/smtp_auth.yaml
+          echo "password: $EMAIL_APP_PASSWORD" >> elastalert/smtp_auth.yaml
+
+      - name:  Run ElastAlert2
+        run: |
+          cd elastalert
+          elastalert --config config.yaml
