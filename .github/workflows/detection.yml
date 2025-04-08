@@ -1,37 +1,34 @@
-name: Detection-as-Code Alert
+name: Sigma Detection as Code
 
 on:
+  workflow_dispatch:
   push:
     branches: [dev]
-    paths:
-      - 'rules/**'
-      - 'ci-script/**'
-      - 'requirements.txt'
-  workflow_dispatch:  # Cho phép chạy thủ công từ GitHub UI
-  schedule:
-    - cron: '*/10 * * * *'  # Chạy mỗi 10 phút (tuỳ chỉnh)
 
 jobs:
-  detect-and-alert:
+  detect:
     runs-on: ubuntu-latest
 
     steps:
-      - name:  Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name:  Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
-      - name:  Install dependencies
+      - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install pysigma==0.10.0
+          pip install git+https://github.com/SigmaHQ/pySigma-backend-elasticsearch.git@main
+          pip install elasticsearch==8.12.1  # Compatible with Elasticsearch 8.17
+          pip install PyYAML==6.0.1 requests==2.31.0 certifi urllib3
 
-      - name:  Run detection script
-        run: |
-          python ci-scripts/detect_and_alert.py
+      - name: Run detection script
         env:
           ELASTIC_URL: ${{ secrets.ELASTIC_URL }}
           ELASTIC_API_KEY: ${{ secrets.ELASTIC_API_KEY }}
           EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+        run: |
+          python detection/ci-scripts/detect_and_alert.py
