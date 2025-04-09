@@ -33,6 +33,16 @@ jobs:
         run: |
           echo "user: hanchiangzo@gmail.com" > elastalert/smtp_auth.yaml
           echo "password: $EMAIL_APP_PASSWORD" >> elastalert/smtp_auth.yaml
+
+      - name: Verify Elasticsearch connection
+        run: |
+          echo " Testing Elasticsearch connection..."
+          curl -X GET "$ELASTIC_HOST/_cluster/health" \
+            -H "Authorization: ApiKey $ELASTIC_API_KEY" \
+            -H 'Content-Type: application/json' \
+            --fail --silent --show-error
+      
+          echo " Connection OK!"
           
       - name: Test ElastAlert rule (simulate historical log)
         run: |
