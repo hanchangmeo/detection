@@ -8,6 +8,12 @@ alert:
 
 email:
   - hachangmeo@gmail.com
+  
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+from_addr: hanchiangzo@gmail.com
+smtp_auth_file: ../smtp_auth.yaml
 
 filter:
   - query:
