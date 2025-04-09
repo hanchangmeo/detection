@@ -1,6 +1,6 @@
 name: T1059 - Malicious Command Execution via Python
 type: any
-index: logs-*
+index: logs-endpoint.events.process-default-*
 description: Detects malicious use of Python to execute commands.
 
 alert:
