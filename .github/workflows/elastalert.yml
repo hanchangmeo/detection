@@ -31,8 +31,8 @@ jobs:
 
       - name:  Generate smtp_auth.yaml from GitHub Secret
         run: |
-          echo "user: hanchiangzo@gmail.com" > elastalert/smtp_auth.yaml
-          echo "password: $EMAIL_APP_PASSWORD" >> elastalert/smtp_auth.yaml
+          echo "user: hanchiangzo@gmail.com" > smtp_auth.yaml
+          echo "password: $EMAIL_APP_PASSWORD" >> smtp_auth.yaml
 
       - name:  Run ElastAlert2
         run: |
