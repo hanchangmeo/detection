@@ -4,6 +4,7 @@ use_ssl: true
 es_api_key: ${ELASTIC_API_KEY}
 
 writeback_index: elastalert_status
+create_index: true
 rules_folder: rules
 
 run_every:
@@ -14,13 +15,28 @@ buffer_time:
 alert_time_limit:
   days: 1
 
+max_query_size: 10000
+es_conn_timeout: 60
+scroll_keepalive: 1m
+
+# Email config nếu dùng email alert
+smtp_host: smtp.gmail.com
+smtp_port: 587
+smtp_ssl: false
+from_addr: hanchiangzo@gmail.com
+smtp_auth_file: smtp_auth.yaml
+
 logging:
   version: 1
   disable_existing_loggers: false
+  formatters:
+    simple:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
   handlers:
     console:
       class: logging.StreamHandler
-      level: INFO
+      formatter: simple
+      level: DEBUG
   root:
     handlers: [console]
-    level: INFO
+    level: DEBUG
