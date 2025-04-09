@@ -18,22 +18,22 @@ filter:
   - query:
       query_string:
         query: >
-          process.command_line:(*python\ -c* OR *import\ requests* OR *os.system*)
+          process.command_line.text:(*python\ -c* OR *import\ requests* OR *os.system*)
 
 include:
-  - process.command_line
+  - process.command_line.text
   - process.parent_name
   - user.name
 
 alert_subject: " [T1059] Python Command Execution Detected"
 alert_subject_args:
-  - process.command_line
+  - process.command_line.text
 alert_text: |
   Possible malicious Python usage detected.
 
   Command: {0}
 alert_text_args:
-  - process.command_line
+  - process.command_line.text
 
 realert:
   minutes: 60
