@@ -6,6 +6,9 @@ description: Detects malicious use of Python to execute commands.
 alert:
   - email
 
+email:
+  - hachangmeo@gmail.com
+
 filter:
   - query:
       query_string:
