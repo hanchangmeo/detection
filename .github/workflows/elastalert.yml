@@ -33,8 +33,15 @@ jobs:
         run: |
           echo "user: hanchiangzo@gmail.com" > elastalert/smtp_auth.yaml
           echo "password: $EMAIL_APP_PASSWORD" >> elastalert/smtp_auth.yaml
+          
+      - name: Test ElastAlert rule (simulate historical log)
+        run: |
+          cd elastalert
+          # Điều chỉnh --start và --end để test rule trên một khoảng thời gian cụ thể (ví dụ: 10 ngày trước)
+          elastalert-test-rule --config config.yaml --start "2025-03-27" --end "2025-03-27" rules/t1059_python_exec.yaml
 
       - name:  Run ElastAlert2
         run: |
           cd elastalert
-          timeout 300s elastalert --config config.yaml --verbose --end now
+          elastalert --config config.yaml --verbose --start "2025-03-27T09:30:00" --end "2025-03-27T09:45:00"
+
