@@ -38,7 +38,7 @@ jobs:
       - name: Test ElastAlert rule (simulate historical log)
         run: |
           cd elastalert
-          elastalert-test-rule --start 2025-03-27T00:00:00 --end 2025-03-27T23:59:59 rules/T1059-malicious-python.yaml
+          elastalert-test-rule --start 2025-03-27T00:00:00 --end 2025-03-27T23:59:59 rules/t1059-malicious-python.yaml
 
       - name:  Run ElastAlert2
         run: |
