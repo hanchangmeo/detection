@@ -38,8 +38,7 @@ jobs:
       - name: Test ElastAlert rule (simulate historical log)
         run: |
           cd elastalert
-          # Điều chỉnh --start và --end để test rule trên một khoảng thời gian cụ thể (ví dụ: 10 ngày trước)
-          elastalert-test-rule --config config.yaml --start "2025-03-27T09:30:00" --end "2025-03-27T09:45:00" rules/t1059_python_exec.yaml
+          elastalert-test-rule --start 2025-03-27T00:00:00 --end 2025-03-27T23:59:59 rules/T1059-malicious-python.yaml
 
       - name:  Run ElastAlert2
         run: |
