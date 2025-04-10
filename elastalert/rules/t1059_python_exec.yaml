@@ -19,7 +19,7 @@ filter:
   - query:
       query_string:
         query: >
-          process.command_line:  *import requests* AND *python -c* AND *import os*
+          'process.args: *import requests*'
 
 alert_text: |
   Possible malicious Python usage detected.
