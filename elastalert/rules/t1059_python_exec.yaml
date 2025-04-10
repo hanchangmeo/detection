@@ -1,25 +1,26 @@
 name: T1059 - Malicious Command Execution via Python
 type: any
-index: logs-*
+index: logs-endpoint.events.process-*
 description: Detects malicious use of Python to execute commands.
 
 alert:
-  - email
-
-email:
-  - hachangmeo@gmail.com
+  - debug
+#alert:
+#  - email
+#email:
+#  - hachangmeo@gmail.com
   
-smtp_host: smtp.gmail.com
-smtp_port: 587
-smtp_ssl: false
-from_addr: hanchiangzo@gmail.com
-smtp_auth_file: ../smtp_auth.yaml
+#smtp_host: smtp.gmail.com
+#smtp_port: 587
+#smtp_ssl: false
+#from_addr: hanchiangzo@gmail.com
+#smtp_auth_file: ../smtp_auth.yaml
 
 filter:
   - query:
       query_string:
         query: >
-          'process.args: *import requests*'
+          process.args: *import requests*
 
 alert_text: |
   Possible malicious Python usage detected.
