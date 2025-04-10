@@ -15,4 +15,5 @@ alert_text: |
 realert:
   minutes: 0
 
+max_hits: 10  # ⚠️ Số lượng log tối đa được xử lý để alert
 priority: 1
