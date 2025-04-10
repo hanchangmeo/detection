@@ -19,7 +19,7 @@ filter:
   - query:
       query_string:
         query: >
-          process.command_line.text: *sh -c* AND *import requests* AND *python -c* AND *import os*
+          process.command_line.text:  *import requests* 
 
 include:
   - process.command_line.text
