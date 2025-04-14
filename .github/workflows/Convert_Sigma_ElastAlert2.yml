@@ -27,7 +27,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          
+      # 4. Cài đặt sigmatools bằng setup.py (cài đặt toàn bộ gói và các entry points)
+      - name: Install sigmatools via setup.py
+        run: |
+          cd legacy-sigmatools/tools
+          python -m pip install .
+          cd ..
 
+      # 5. Hiển thị trợ giúp của sigmac để kiểm tra
+      - name: Show sigmac help
+        run: |
+          echo "=== sigmac -h output ==="
+          sigmac -h
 
 
       # Bước 4: Chuyển đổi rule Sigma sang ElastAlert (sử dụng sigmac)
@@ -38,7 +50,7 @@ jobs:
             echo "Converting ${file}..."
             # Sử dụng sigmac với target elastalert và schema mapping được chỉ định trong file cấu hình,
             # ví dụ: sử dụng file sigma/tools/config/elastic_schema_config_file.yml trong repo sigma.
-           python legacy-sigmatools/tools/sigmac -t elastalert -c ./elastic_schema_config_file.yml "$file" >> elastalert/rules/$(basename "$file")
+            legacy-sigmatools/tools/sigmac -t elastalert -c ./config/elastic_schema_config_file.yml "$file" >> elastalert/rules/$(basename "$file")
           done
 
       # Bước 5: Commit và push các rule đã chuyển đổi
