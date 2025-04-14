@@ -20,11 +20,7 @@ jobs:
       # Bước 2: Clone repo sigma từ SigmaHQ (với commit cụ thể)
       - name: Clone Sigma Repository
         run: |
-          git clone https://github.com/SigmaHQ/sigma.git
-          cd sigma
-          # Checkout đến commit mà bạn mong muốn (ví dụ commit bd645ad8e0b5d96f40a200393366a31161c5df2c)
-          git checkout bd645ad8e0b5d96f40a200393366a31161c5df2c
-          cd ..
+          git clone https://github.com/SigmaHQ/legacy-sigmatools.git
 
       # Bước 3: Cài đặt các phụ thuộc cần thiết (nếu có)
       - name: Set up Python Environment
