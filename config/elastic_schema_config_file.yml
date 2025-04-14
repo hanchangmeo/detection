@@ -1,0 +1,43 @@
+# elastic_schema_config_file.yml
+# File này định nghĩa các giá trị mặc định và ánh xạ các trường từ Sigma rule sang ElastAlert2 rule.
+
+# Các giá trị mặc định cho ElastAlert rule nếu Sigma rule không cung cấp.
+defaults:
+  index: "*:logs-*"
+  alert:
+    - debug
+  priority: 3
+  realert:
+    minutes: 0
+  type: any
+
+# Các ánh xạ trường từ Sigma sang ElastAlert.
+# Bạn cần đảm bảo rằng các placeholder như {query}, {id}, {title} phù hợp với các trường có trong Sigma rule của bạn.
+mappings:
+  # Tên rule ElastAlert: thường lấy từ ID của Sigma rule.
+  name: "{id}"
+
+  # Mô tả của rule: bạn có thể ánh xạ từ trường title hoặc description của Sigma.
+  description: "{title}"
+
+  # Filter: Đây là template để xây dựng truy vấn Elasticsearch.
+  # {query} sẽ được thay thế bởi nội dung truy vấn chuyển đổi (ví dụ: (event_type:"bro_smb_files" AND path.keyword:\\*\\IPC$ AND name:"atsvc"))
+  filter: |
+    {
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "query_string": {
+                "query": "{query}"
+              }
+            }
+          ]
+        }
+      }
+    }
+
+  # Định nghĩa query_key dùng để gom nhóm các alert liên quan.
+  query_key:
+    - "source_ip"
+    - "destination_ip"
