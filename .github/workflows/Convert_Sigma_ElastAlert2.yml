@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - dev
-    paths:
-      - 'rules/*.yml'
+
 
 jobs:
   convert:
