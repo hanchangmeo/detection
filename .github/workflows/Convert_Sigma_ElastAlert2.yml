@@ -24,7 +24,7 @@ jobs:
       - name: Install sigma-cli and elastalert plugin
         run: |
           pip install sigma-cli
-          sigma plugin install elastalert
+
 
       - name: Convert Sigma Rules to ElastAlert2 format with override index
         run: |
@@ -41,3 +41,4 @@ jobs:
           git add elastalert/rules/
           git commit -m "Auto-convert Sigma rules to ElastAlert2 format"
           git push
+  
