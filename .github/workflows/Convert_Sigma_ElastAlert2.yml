@@ -1,0 +1,42 @@
+name: Convert Sigma Rules to ElastAlert2
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'rules/*.yml'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install sigma-cli and elastalert plugin
+        run: |
+          pip install sigma-cli
+          sigma plugin install elastalert
+
+      - name: Convert Sigma Rules to ElastAlert2 format with override index
+        run: |
+          mkdir -p elastalert/rules
+          for file in rules/*.yml; do
+            echo "Converting ${file}..."
+            sigma convert --target elastalert --pipeline default --output elastalert/rules/$(basename "$file") "$file" --override "index: log-*"
+          done
+
+      - name: Commit and push converted rules
+        run: |
+          git config --global user.name "hanchangmeo"
+          git config --global user.email "hanchiangzo@gmail.com"
+          git add elastalert/rules/
+          git commit -m "Auto-convert Sigma rules to ElastAlert2 format"
+          git push
