@@ -38,7 +38,7 @@ jobs:
             echo "Converting ${file}..."
             # Sử dụng sigmac với target elastalert và schema mapping được chỉ định trong file cấu hình,
             # ví dụ: sử dụng file sigma/tools/config/elastic_schema_config_file.yml trong repo sigma.
-           python legacy-sigmatools/sigmac.py -t elastalert -c ./elastic_schema_config_file.yml "$file" >> elastalert/rules/$(basename "$file")
+           python legacy-sigmatools/tools/sigmac -t elastalert -c ./elastic_schema_config_file.yml "$file" >> elastalert/rules/$(basename "$file")
           done
 
       # Bước 5: Commit và push các rule đã chuyển đổi
