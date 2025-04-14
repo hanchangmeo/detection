@@ -1,4 +1,4 @@
-name: Convert Sigma Rules to ElastAlert2
+name: Convert Sigma Rules to ElastAlert using sigmac
 
 on:
   push:
@@ -13,53 +13,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Bước 1: Checkout repository của bạn chứa các rule Sigma
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      # Bước 2: Clone repo sigma từ SigmaHQ (với commit cụ thể)
+      - name: Clone Sigma Repository
+        run: |
+          git clone https://github.com/SigmaHQ/sigma.git
+          cd sigma
+          # Checkout đến commit mà bạn mong muốn (ví dụ commit bd645ad8e0b5d96f40a200393366a31161c5df2c)
+          git checkout bd645ad8e0b5d96f40a200393366a31161c5df2c
+          cd ..
+
+      # Bước 3: Cài đặt các phụ thuộc cần thiết (nếu có)
+      - name: Set up Python Environment
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install sigma-cli
+      # Hiển thị thông tin trợ giúp của sigmac (để kiểm tra)
+      - name: Show sigmac help
         run: |
-          pip install sigma-cli
+          echo "=== sigmac -h output ==="
+          python sigma/sigmac.py -h
 
-      - name: Show sigma help
-        run: |
-          echo "=== sigma -h output ==="
-          sigma -h
-
-      - name: Show sigma convert help
-        run: |
-          echo "=== sigma convert -h output ==="
-          sigma convert -h
-      - name: Show sigma convert -l
-        run: |
-          echo "=== sigma convert -l output ==="
-          sigma -l
-
-      - name: Show sigma plugin list
-        run: |
-          echo "=== sigma plugin list output ==="
-          sigma plugin list || echo "sigma plugin list not supported in this version."
-
-      - name: Convert Sigma Rules to ElastAlert2 format
+      # Bước 4: Chuyển đổi rule Sigma sang ElastAlert (sử dụng sigmac)
+      - name: Convert Sigma Rules to ElastAlert format
         run: |
           mkdir -p elastalert/rules
           for file in rules/*.yml; do
             echo "Converting ${file}..."
-            # Ở phiên bản sigma-cli mới không hỗ trợ --config cũng như --override, do đó ta chỉ gọi lệnh chuyển đổi cơ bản.
-            sigma convert --target elastalert --pipeline default --output elastalert/rules/$(basename "$file") "$file"
+            # Sử dụng sigmac với target elastalert và schema mapping được chỉ định trong file cấu hình,
+            # ví dụ: sử dụng file sigma/tools/config/elastic_schema_config_file.yml trong repo sigma.
+            sigmac -t elastalert -c ./elastic_schema_config_file.yml "$file" >> elastalert/rules/$(basename "$file")
           done
 
+      # Bước 5: Commit và push các rule đã chuyển đổi
       - name: Commit and push converted rules
         run: |
           git config --global user.name "hanchangmeo"
           git config --global user.email "hanchiangzo@gmail.com"
           git add elastalert/rules/
           if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "Auto-convert Sigma rules to ElastAlert2 format"
+            git commit -m "Auto-convert Sigma rules to ElastAlert format using sigmac"
             git push
           else
             echo "No changes detected."
