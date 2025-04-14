@@ -31,7 +31,7 @@ jobs:
           mkdir -p elastalert/rules
           for file in rules/*.yml; do
             echo "Converting ${file}..."
-            sigma convert --target elastalert --pipeline default --output elastalert/rules/$(basename "$file") "$file" --override "index: log-*"
+            sigma convert --target elastalert --pipeline default --config config.yml --output elastalert/rules/$(basename "$file") "$file"
           done
 
       - name: Commit and push converted rules
