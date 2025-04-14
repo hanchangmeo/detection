@@ -21,17 +21,32 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install sigma-cli and elastalert plugin
+      - name: Install sigma-cli
         run: |
           pip install sigma-cli
 
+      - name: Show sigma help
+        run: |
+          echo "=== sigma -h output ==="
+          sigma -h
 
-      - name: Convert Sigma Rules to ElastAlert2 format with override index
+      - name: Show sigma convert help
+        run: |
+          echo "=== sigma convert -h output ==="
+          sigma convert -h
+
+      - name: Show sigma plugin list
+        run: |
+          echo "=== sigma plugin list output ==="
+          sigma plugin list || echo "sigma plugin list not supported in this version."
+
+      - name: Convert Sigma Rules to ElastAlert2 format
         run: |
           mkdir -p elastalert/rules
           for file in rules/*.yml; do
             echo "Converting ${file}..."
-            sigma convert --target elastalert --pipeline default --config config.yml --output elastalert/rules/$(basename "$file") "$file"
+            # Ở phiên bản sigma-cli mới không hỗ trợ --config cũng như --override, do đó ta chỉ gọi lệnh chuyển đổi cơ bản.
+            sigma convert --target elastalert --pipeline default --output elastalert/rules/$(basename "$file") "$file"
           done
 
       - name: Commit and push converted rules
@@ -39,6 +54,9 @@ jobs:
           git config --global user.name "hanchangmeo"
           git config --global user.email "hanchiangzo@gmail.com"
           git add elastalert/rules/
-          git commit -m "Auto-convert Sigma rules to ElastAlert2 format"
-          git push
-  
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Auto-convert Sigma rules to ElastAlert2 format"
+            git push
+          else
+            echo "No changes detected."
+          fi
