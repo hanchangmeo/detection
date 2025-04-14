@@ -1,0 +1,14 @@
+alert:
+- debug
+description: Detects malicious use of Python to execute commands.
+filter:
+- query:
+    query_string:
+      query: process.command_line.keyword:(*python\ \-c* OR *import\ requests* OR *os.system*)
+index: logstash-*
+name: a96d2a90-9341-11ed-b1eb-0242ac120003
+priority: 2
+realert:
+  minutes: 0
+type: any
+
