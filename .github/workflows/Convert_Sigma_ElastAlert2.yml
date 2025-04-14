@@ -32,11 +32,7 @@ jobs:
         with:
           python-version: '3.9'
 
-      # Hiển thị thông tin trợ giúp của sigmac (để kiểm tra)
-      - name: Show sigmac help
-        run: |
-          echo "=== sigmac -h output ==="
-          python sigma/sigmac.py -h
+
 
       # Bước 4: Chuyển đổi rule Sigma sang ElastAlert (sử dụng sigmac)
       - name: Convert Sigma Rules to ElastAlert format
