@@ -39,7 +39,7 @@ postprocessing:
       "type": "query",
       "language": "lucene",
       "index": {{ pipeline.vars.index_names | tojson }},
-      "query": "{{ query }}",
+      "query": "{{ query | tojson }}",
       "rule_id": "{{ rule.id }}",
       "timestamp_override": "event.ingested",
       "references": {{ rule.references | tojson(indent=6) }},
