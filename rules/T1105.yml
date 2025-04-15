@@ -9,7 +9,7 @@ logsource:
 detection:
   selection:
     process.commandline|contains:
-      - "-r"           
+      - "desktop"           
   condition: selection
 fields:
   - ProcessName
