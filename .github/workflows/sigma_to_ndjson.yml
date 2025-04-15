@@ -1,0 +1,46 @@
+name: Convert Sigma Rules Kibana NDJSON
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "rules/**"  # Khi có thay đổi trong thư mục rules
+  workflow_dispatch: # Thêm tùy chọn trigger thủ công
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install sigma-cli and plugin
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install sigma-cli
+          # Cài plugin cho Elasticsearch backend (tên có thể là "elastic" hoặc như hướng dẫn của dự án)
+          sigma plugin list
+          sigma plugin install elastic
+
+      - name: Run conversion script to create individual NDJSON files
+        run: |
+          chmod +x ./scripts/convert_rules.sh
+          ./scripts/convert_rules.sh
+
+
+      - name: Commit and push NDJSON file
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: "CI Bot"
+          author_email: "ci-bot@example.com"
+          message: "Update NDJSON converted rule from sigma"
+          add: "kibana/output.ndjson"
