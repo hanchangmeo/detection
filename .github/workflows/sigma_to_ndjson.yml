@@ -33,8 +33,8 @@ jobs:
 
       - name: Run conversion script to create individual NDJSON files
         run: |
-          chmod +x ./scripts/sigma_to_ndjson.sh
-          ./scripts/sigma_to_ndjson.sh
+          chmod +x ./ci-scripts/sigma_to_ndjson.sh
+          ./ci-scripts/sigma_to_ndjson.sh
 
 
       - name: Commit and push NDJSON file
