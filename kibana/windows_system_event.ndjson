@@ -1,0 +1,22 @@
+{
+  "id": "None",
+  "created_by": "Josh Brower",
+  "name": "Windows System Event Log Cleared",
+  "tags": [
+  ],
+  "interval": "5m",
+  "description": "Detects when the Windows System eventlog has been cleared by looking for event id 104",
+  "risk_score": 74,
+  "enabled": true,
+  "severity": "high",
+  "false_positives": ["None"],
+  "from": "now-5m",
+  "type": "query",
+  "language": "lucene",
+  "index": ["apm-*-transaction*", "auditbeat-*", "endgame-*", "filebeat-*", "logs-*", "packetbeat-*", "traces-apm*", "winlogbeat-*"],
+  "query": ""EventID:104"",
+  "rule_id": "None",
+  "timestamp_override": "event.ingested",
+  "references": [],
+  "note": ""
+}
