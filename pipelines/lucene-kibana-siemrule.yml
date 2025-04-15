@@ -19,7 +19,7 @@ vars:
 
 postprocessing:
 - type: template
-  template: |+
+  template: >-
     {
       "id": "{{ rule.id }}",
       "created_by": "{{ rule.author }}",
