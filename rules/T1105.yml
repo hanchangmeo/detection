@@ -10,8 +10,6 @@ detection:
   selection:
     process.commandline|contains:
       - "-r"           
-      - "@"
-      - ":"
   condition: selection
 fields:
   - ProcessName
