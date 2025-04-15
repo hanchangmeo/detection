@@ -12,3 +12,17 @@ realert:
   minutes: 0
 type: any
 
+alert:
+- debug
+description: Detects the use of rsync to perform a remote file copy (push) operation.
+filter:
+- query:
+    query_string:
+      query: process.commandline.keyword:(*\-r* OR *@* OR *\:*)
+index: logstash-*
+name: 0fc6e977-cb12-44f6-b263-2824ba917409
+priority: 3
+realert:
+  minutes: 0
+type: any
+
