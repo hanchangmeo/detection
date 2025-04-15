@@ -14,7 +14,7 @@
   "type": "query",
   "language": "lucene",
   "index": ["apm-*-transaction*", "auditbeat-*", "endgame-*", "filebeat-*", "logs-*", "packetbeat-*", "traces-apm*", "winlogbeat-*"],
-  "query": ""process.commandline:*\\-r*"",
+  "query": ""process.commandline:*desktop*"",
   "rule_id": "0fc6e977-cb12-44f6-b263-2824ba917409",
   "timestamp_override": "event.ingested",
   "references": [],
