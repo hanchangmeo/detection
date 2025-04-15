@@ -1,0 +1,22 @@
+{
+  "id": "0fc6e977-cb12-44f6-b263-2824ba917409",
+  "created_by": "Meo",
+  "name": "Suspicious rsync Remote File Copy (Push)",
+  "tags": ["attack.t1105.001","attack.execution","attack.lateral_movement"
+  ],
+  "interval": "5m",
+  "description": "Detects the use of rsync to perform a remote file copy (push) operation.",
+  "risk_score": 44,
+  "enabled": true,
+  "severity": "medium",
+  "false_positives": [],
+  "from": "now-5m",
+  "type": "query",
+  "language": "lucene",
+  "index": ["apm-*-transaction*", "auditbeat-*", "endgame-*", "filebeat-*", "logs-*", "packetbeat-*", "traces-apm*", "winlogbeat-*"],
+  "query": "process.commandline:(*\-r* OR *@* OR *\:*)",
+  "rule_id": "0fc6e977-cb12-44f6-b263-2824ba917409",
+  "timestamp_override": "event.ingested",
+  "references": [],
+  "note": ""
+}
