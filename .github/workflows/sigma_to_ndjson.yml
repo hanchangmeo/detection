@@ -29,7 +29,7 @@ jobs:
           python -m pip install sigma-cli
           # Cài plugin cho Elasticsearch backend (tên có thể là "elastic" hoặc như hướng dẫn của dự án)
           sigma plugin list
-          sigma plugin install elastic
+          sigma plugin install elasticsearch
 
       - name: Run conversion script to create individual NDJSON files
         run: |
