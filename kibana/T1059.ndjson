@@ -14,7 +14,7 @@
   "type": "query",
   "language": "lucene",
   "index": ["apm-*-transaction*", "auditbeat-*", "endgame-*", "filebeat-*", "logs-*", "packetbeat-*", "traces-apm*", "winlogbeat-*"],
-  "query": "process.command_line:(*python\ \-c* OR *import\ requests* OR *os.system*)",
+  "query": ""process.command_line:*import\\ requests*"",
   "rule_id": "a96d2a90-9341-11ed-b1eb-0242ac120003",
   "timestamp_override": "event.ingested",
   "references": [],
