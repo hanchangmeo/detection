@@ -1,6 +1,7 @@
 title: Suspicious rsync Remote File Copy (Push)
 id: 0fc6e977-cb12-44f6-b263-2824ba917409
 description: Detects the use of rsync to perform a remote file copy (push) operation.
+author: Meo
 status: experimental
 logsource:
   product: linux
