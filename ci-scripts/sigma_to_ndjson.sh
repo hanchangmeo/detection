@@ -6,7 +6,7 @@ mkdir -p kibana
 
 # Nếu bạn lưu file pipeline "lucene-kibana-siemrule.yml" tại thư mục "pipeline",
 # điều chỉnh đường dẫn tương ứng (ví dụ: pipeline/lucene-kibana-siemrule.yml)
-PIPELINE_PATH="pipeline/lucene-kibana-siemrule.yml"
+PIPELINE_PATH="pipelines/lucene-kibana-siemrule.yml"
 
 # Duyệt qua các file rule trong thư mục rules (chỉ các file .yml)
 for rule in ./rules/*.yml; do
