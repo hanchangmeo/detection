@@ -11,22 +11,31 @@ jobs:
   convert:
     runs-on: ubuntu-latest
     steps:
+      # Bước 1: Checkout repository của bạn
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Bước 2: Clone repository legacy-sigmatools chứa sigma tools
+      - name: Clone legacy sigmatools
+        run: git clone https://github.com/SigmaHQ/legacy-sigmatools.git ./sigma
+
+      # Bước 3: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
+      # Bước 4: Cài đặt các dependencies cần thiết (ví dụ, PyYAML)
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pyyaml
 
+      # Bước 5: Chạy script chuyển đổi sigma (ví dụ, sigma_kibana.py)
       - name: Run Sigma conversion script
         run: python sigma_kibana.py
 
+      # Bước 6: Commit và push các file NDJSON đã được chuyển đổi
       - name: Commit and push NDJSON files
         uses: EndBug/add-and-commit@v9
         with:
