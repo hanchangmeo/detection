@@ -11,6 +11,11 @@ vars:
     - "winlogbeat-*"
   schedule_interval: 5
   schedule_interval_unit: m
+  severity_risk_mapping:
+    low: 21
+    medium: 44
+    high: 74
+    critical: 99
 
 postprocessing:
 - type: template
@@ -26,7 +31,7 @@ postprocessing:
       ],
       "interval": "{{ pipeline.vars.schedule_interval }}{{ pipeline.vars.schedule_interval_unit }}",
       "description": "{{ rule.description }}",
-      "risk_score": {{ self.severity_risk_mapping[rule.level.name] if rule.level is not none else 21 }},
+      "risk_score": {{ self.severity_risk_mapping[rule.level.name | lower] if rule.level is not none else 21 }},
       "enabled": true,
       "severity": "{{ rule.level.name | lower if rule.level is not none else 'low' }}",
       "false_positives": {{ rule.falsepositives | tojson }},
