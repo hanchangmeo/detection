@@ -43,4 +43,4 @@ jobs:
           author_name: "CI Bot"
           author_email: "ci-bot@example.com"
           message: "Update NDJSON converted rule from sigma"
-          add: "kibana/output.ndjson"
+          add: "kibana/*.ndjson"
