@@ -9,9 +9,7 @@ logsource:
 detection:
   selection:
     process.command_line|contains:
-      - "python -c"
       - "import requests"
-      - "os.system"
   condition: selection
 fields:
   - process.command_line
