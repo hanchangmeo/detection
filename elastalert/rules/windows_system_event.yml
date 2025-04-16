@@ -1,0 +1,14 @@
+alert:
+- debug
+description: Detects when the Windows System eventlog has been cleared by looking for event id 104
+filter:
+- query:
+    query_string:
+      query: EventID:"104"
+index: logstash-*
+name: Windows-System-Event-Log-Cleared
+priority: 2
+realert:
+  minutes: 0
+type: any
+
