@@ -30,6 +30,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install sigma-cli
           pip install pyyaml 
+          sigma plugin install elasticsearch
 
       - name: Create output directory
         run: mkdir -p opensearch
