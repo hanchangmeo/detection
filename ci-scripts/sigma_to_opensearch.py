@@ -17,13 +17,11 @@ def setup_backend(index_patterns=None, interval=10, unit="MINUTES"):
     """
     Khởi tạo và trả về OpensearchLuceneBackend với pipeline được cấu hình sẵn.
     """
-    # Tạo pipeline resolver và thêm các pipelines cần thiết
     resolver = ProcessingPipelineResolver()
     resolver.add_pipeline_class(ecs_windows())
     resolver.add_pipeline_class(sysmon_pipeline())
     resolved = resolver.resolve(resolver.pipelines)
 
-    # Khởi tạo backend
     backend = OpensearchLuceneBackend(
         resolved,
         index_names=index_patterns or ['logs-*-*', 'beats-*'],
@@ -37,13 +35,10 @@ def convert_directory(rules_dir='rules', output_dir='opensearch', **backend_kwar
     """
     Duyệt qua các file rule trong `rules_dir`, convert và xuất file JSON sang `output_dir`.
     """
-    # Thiết lập backend
     backend = setup_backend(**backend_kwargs)
 
-    # Tạo thư mục đích nếu chưa tồn tại
     os.makedirs(output_dir, exist_ok=True)
 
-    # Duyệt file .yml/.yaml
     for fname in os.listdir(rules_dir):
         if not fname.lower().endswith(('.yml', '.yaml')):
             continue
@@ -52,13 +47,23 @@ def convert_directory(rules_dir='rules', output_dir='opensearch', **backend_kwar
         try:
             with open(src, 'r', encoding='utf-8') as f:
                 yaml_text = f.read()
-            # Load SigmaCollection từ YAML
+
             rules = SigmaCollection.from_yaml(yaml_text)
-            # Convert sang monitor_rule
-            monitor_json = backend.convert(rules, output_format="monitor_rule")
-            # Ghi ra file
+            monitor_rules = backend.convert(rules, output_format="monitor_rule")
+
+            # Chuyển đổi thành list các dict
+            objs = []
+            for mr in monitor_rules:
+                if isinstance(mr, str):
+                    objs.append(json.loads(mr))
+                else:
+                    objs.append(mr)
+
+            # Ghi kết quả: nếu chỉ có 1 monitor, unwrap thành object, ngược lại giữ list
+            output_data = objs[0] if len(objs) == 1 else objs
             with open(dst, 'w', encoding='utf-8') as out:
-                json.dump(json.loads(monitor_json), out, indent=2)
+                json.dump(output_data, out, indent=2)
+
             print(f"[OK] Converted {fname} -> {os.path.basename(dst)}")
         except Exception as ex:
             print(f"[ERROR] Khi convert {fname}: {ex}")
