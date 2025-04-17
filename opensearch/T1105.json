@@ -1,0 +1,60 @@
+{
+  "type": "monitor",
+  "name": "SIGMA - Suspicious rsync Remote File Copy (Push)",
+  "description": "Detects the use of rsync to perform a remote file copy (push) operation.",
+  "enabled": true,
+  "schedule": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  },
+  "inputs": [
+    {
+      "search": {
+        "indices": [
+          "logs-*-*",
+          "beats-*"
+        ],
+        "query": {
+          "size": 1,
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "query_string": {
+                    "query": "process.commandline:*desktop*",
+                    "analyze_wildcard": true
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "tags": [
+    "attack-t1105.001",
+    "attack-execution",
+    "attack-lateral_movement"
+  ],
+  "triggers": [
+    {
+      "name": "generated-trigger",
+      "severity": 3,
+      "condition": {
+        "script": {
+          "source": "ctx.results[0].hits.total.value > 0",
+          "lang": "painless"
+        }
+      },
+      "actions": []
+    }
+  ],
+  "sigma_meta_data": {
+    "rule_id": "0fc6e977-cb12-44f6-b263-2824ba917409",
+    "threat": []
+  },
+  "references": []
+}

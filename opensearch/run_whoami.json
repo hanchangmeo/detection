@@ -1,0 +1,62 @@
+{
+  "type": "monitor",
+  "name": "SIGMA - Run Whoami Showing Privileges",
+  "description": "Detects a whoami.exe executed with the /priv command line flag instructing the tool to show all current user privieleges. This is often used after a privilege escalation attempt.",
+  "enabled": true,
+  "schedule": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  },
+  "inputs": [
+    {
+      "search": {
+        "indices": [
+          "logs-*-*",
+          "beats-*"
+        ],
+        "query": {
+          "size": 1,
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "query_string": {
+                    "query": "winlog.channel:Microsoft\\-Windows\\-Sysmon\\/Operational AND (event.code:1 AND ((process.executable:*\\\\whoami.exe OR process.pe.original_file_name:whoami.exe) AND process.command_line:*\\/priv*))",
+                    "analyze_wildcard": true
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "tags": [
+    "attack-privilege_escalation",
+    "attack-discovery",
+    "attack-t1033"
+  ],
+  "triggers": [
+    {
+      "name": "generated-trigger",
+      "severity": 2,
+      "condition": {
+        "script": {
+          "source": "ctx.results[0].hits.total.value > 0",
+          "lang": "painless"
+        }
+      },
+      "actions": []
+    }
+  ],
+  "sigma_meta_data": {
+    "rule_id": "97a80ec7-0e2f-4d05-9ef4-65760e634f6b",
+    "threat": []
+  },
+  "references": [
+    "https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/whoami"
+  ]
+}
