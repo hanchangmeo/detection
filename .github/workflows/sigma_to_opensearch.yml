@@ -31,6 +31,7 @@ jobs:
           python -m pip install sigma-cli
           pip install pyyaml 
           sigma plugin install elasticsearch
+          pip install pysigma-pipeline-sysmon 
 
       - name: Create output directory
         run: mkdir -p opensearch
