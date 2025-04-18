@@ -383,7 +383,7 @@ All Sigma rules licensed under DRL: https://github.com/SigmaHQ/sigma/blob/master
         xml = re.sub(r'</rule></group>', r'</rule>\n</group>', xml)
         xml = xml.replace('<?xml version="1.0" encoding="utf-8"?>\n', '')
 
-        with open(self.out_file, "w", encoding="utf-8") as file:
+        with open(self.out_file, "w+", encoding="utf-8") as file:
             file.write(xml)
 
         self.write_wazah_id_to_sigman_id()
