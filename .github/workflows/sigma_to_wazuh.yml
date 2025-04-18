@@ -1,4 +1,4 @@
-name: Convert Sigma to Wazuh
+name: Sigma to Wazuh 
 
 on:
   push:
@@ -6,40 +6,36 @@ on:
       - dev
     paths:
       - 'rules/**'
-  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - 'rules/**'
+
 
 jobs:
   convert:
+    name: Convert Sigma rules to Wazuh XML
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
 
-      - name: Install converter deps
-        run: |
-          pip install --upgrade pip
-          pip install pyyaml lxml bs4 ruamel.yaml
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
 
-      - name: Prepare output & tracking files
-        run: |
-          mkdir -p $(dirname ./wazuh/wazuh.xml)
-          touch ./rule_ids.json
-          
-      - name: Run SigmatWazuh converter
-        run: |
-          python3 ci-scripts/sigma_to_wazuhfail.py 
+    - name: Run Sigma-to-Wazuh converter
+      run: python sigma_to_wazuh.py
 
-      - name: Commit & push generated files
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: 'chore: update individual Wazuh rule files'
-          file_pattern: 'wazuh/*.xml'
-          branch: ${{ github.ref_name }}
+    - name: Commit & push generated XML
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: 'ci: update Wazuh rules from Sigma conversion'
+        file_pattern: 'wazuh/**'
+        branch: ${{ github.ref_name }}
