@@ -9,7 +9,7 @@ on:
   pull_request:
     paths:
       - 'rules/**'
-
+  workflow_dispatch: 
 
 jobs:
   convert:
