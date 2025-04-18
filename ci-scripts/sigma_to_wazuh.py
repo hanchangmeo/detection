@@ -392,7 +392,7 @@ All Sigma rules licensed under DRL: https://github.com/SigmaHQ/sigma/blob/master
 class ParseSigmaRules(object):
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read(r'./config.ini')
+        self.config.read(r'./config/config.ini')
         self.sigma_rules_dir = self.config.get('sigma', 'directory')
         self.sigma_rules = self.get_sigma_rules()
         self.error_count = 0
@@ -899,7 +899,7 @@ class ParseSigmaRules(object):
 class TrackSkips(object):
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read(r'./config.ini', encoding="utf8")
+        self.config.read(r'./config/config.ini', encoding="utf8")
         self.wazuh_rules_file = self.config.get('sigma', 'out_file')
         self.process_experimental_rules = self.config.get('sigma', 'process_experimental')
         self.sigma_skip_ids = eval(self.config.get('sigma', 'skip_sigma_guids'), {}, {})
