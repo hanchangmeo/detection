@@ -28,7 +28,7 @@ jobs:
 
       - name: Run SigmatWazuh converter
         run: |
-          python3 ci-script/sigma_to_wazuh.py 
+          python3 ci-scripts/sigma_to_wazuh.py 
 
       - name: Commit & push generated files
         uses: stefanzweifel/git-auto-commit-action@v4
