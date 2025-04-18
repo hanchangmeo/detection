@@ -24,7 +24,7 @@ jobs:
       - name: Install converter deps
         run: |
           pip install --upgrade pip
-          pip install lxml bs4 ruamel.yaml
+          pip install pyyaml lxml bs4 ruamel.yaml
 
       - name: Run SigmatWazuh converter
         run: |
