@@ -26,6 +26,11 @@ jobs:
           pip install --upgrade pip
           pip install pyyaml lxml bs4 ruamel.yaml
 
+      - name: Prepare output & tracking files
+        run: |
+          mkdir -p $(dirname ./wazuh/wazuh.xml)
+          touch ./rule_ids.json
+          
       - name: Run SigmatWazuh converter
         run: |
           python3 ci-scripts/sigma_to_wazuh.py 
