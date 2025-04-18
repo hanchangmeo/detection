@@ -59,7 +59,9 @@ class BuildRules(object):
         self.rule_id_start = int(self.config.get('options', 'rule_id_start'))
         self.rule_id = self.rule_id_start
         self.out_file = self.config.get('sigma', 'out_file')
+        print("========== 1 ===========")
         self.track_rule_ids_file = self.config.get('options','rule_id_file')  # file that stores Sigma GUID to Wazuh rule ID mappings
+        print("========== 2 ===========")
         self.track_rule_ids = self.load_wazuh_to_sigma_id_mappings()  # in memory Dict of self.track_rule_ids_file contents
         self.used_wazuh_ids = self.get_used_wazuh_rule_ids()  # used Wazuh rule IDs used in previous runs
         self.used_wazuh_ids_this_run = []  # new Wazuh rule IDs consummed this run
