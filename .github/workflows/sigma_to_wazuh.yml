@@ -31,7 +31,8 @@ jobs:
         pip install pyyaml
 
     - name: Run Sigma-to-Wazuh converter
-      run: python sigma_to_wazuh.py
+      run: |
+        python ./ci-scripts/sigma_to_wazuh.py
 
     - name: Commit & push generated XML
       uses: stefanzweifel/git-auto-commit-action@v4
