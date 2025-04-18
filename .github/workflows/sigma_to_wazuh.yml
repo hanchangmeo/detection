@@ -1,0 +1,38 @@
+name: Convert Sigma to Wazuh
+
+on:
+  push:
+    paths:
+      - 'rules/**'
+  workflow_dispatch: {}
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install converter deps
+        run: |
+          pip install --upgrade pip
+          pip install lxml bs4 ruamel.yaml
+
+      - name: Run SigmatWazuh converter
+        run: |
+          python3 ci-script/sigma_to_wazuh.py 
+
+      - name: Commit & push generated files
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'chore: update individual Wazuh rule files'
+          file_pattern: 'wazuh/*.xml'
+          branch: ${{ github.ref_name }}
