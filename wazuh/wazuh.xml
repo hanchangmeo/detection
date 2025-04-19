@@ -1,1 +1,49 @@
-
+<group name="sigma,">
+    <!--
+Author: Brian Kellogg
+Sigma: https://github.com/SigmaHQ/sigma
+Wazuh: https://wazuh.com
+All Sigma rules licensed under DRL: https://github.com/SigmaHQ/sigma/blob/master/LICENSE.Detection.Rules.md
+-->
+    <rule id="900001" level="13">
+        <info type="link">https://github.com/hanchangmeo/detection/tree/dev/rules/registry_add_malware_netwire.yml</info>
+        <!--Sigma Rule Author: Christopher Peacock-->
+        <!--Description: Detects registry keys related to NetWire RAT-->
+        <!--Date: 2021-10-07-->
+        <!--Status: test-->
+        <!--ID: 1d218616-71b0-4c40-855b-9dbe75510f7f-->
+        <mitre>
+            <id>attack.defense-evasion</id>
+            <id>attack.t1112</id>
+        </mitre>
+        <description>Potential NetWire RAT Activity - Registry</description>
+        <options>no_full_log</options>
+        <group>windows,registry_add,</group>
+        <if_sid>18100, 60000, 60001, 60002, 60003, 60004, 60006, 60007, 60008, 60009, 60010, 60011, 60012</if_sid>
+        <field name="win.eventdata.eventType" negate="no" type="pcre2">(?i)^CreateKey$</field>
+        <field name="win.eventdata.targetObject" negate="no" type="pcre2">(?i)\\+software\\+NetWire</field>
+    </rule>
+    <rule id="900002" level="13">
+        <info type="link">https://github.com/hanchangmeo/detection/tree/dev/rules/create_remote_thread_win_hktl_cactustorch.yml</info>
+        <!--Sigma Rule Author: @SBousseaden (detection), Thomas Patzke (rule)-->
+        <!--Description: Detects remote thread creation from CACTUSTORCH as described in references.-->
+        <!--Date: 2019-02-01-->
+        <!--Status: test-->
+        <!--ID: 2e4e488a-6164-4811-9ea1-f960c7359c40-->
+        <mitre>
+            <id>attack.defense-evasion</id>
+            <id>attack.execution</id>
+            <id>attack.t1055.012</id>
+            <id>attack.t1059.005</id>
+            <id>attack.t1059.007</id>
+            <id>attack.t1218.005</id>
+        </mitre>
+        <description>HackTool - CACTUSTORCH Remote Thread Creation</description>
+        <options>no_full_log</options>
+        <group>windows,create_remote_thread,</group>
+        <if_sid>18100, 60000, 60001, 60002, 60003, 60004, 60006, 60007, 60008, 60009, 60010, 60011, 60012</if_sid>
+        <field name="win.eventdata.sourceImage" negate="no" type="pcre2">(?i)\\+System32\\+cscript\.exe|\\+System32\\+wscript\.exe|\\+System32\\+mshta\.exe|\\+winword\.exe|\\+excel\.exe</field>
+        <field name="win.eventdata.targetImage" negate="no" type="pcre2">(?i)\\+SysWOW64\\+</field>
+        <field name="win.eventdata.startModule" negate="no" type="pcre2">(?i)^None$</field>
+    </rule>
+</group>
