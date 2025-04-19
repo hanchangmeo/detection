@@ -1,0 +1,66 @@
+{
+  "type": "monitor",
+  "name": "SIGMA - HackTool - CACTUSTORCH Remote Thread Creation",
+  "description": "Detects remote thread creation from CACTUSTORCH as described in references.",
+  "enabled": true,
+  "schedule": {
+    "period": {
+      "interval": 10,
+      "unit": "MINUTES"
+    }
+  },
+  "inputs": [
+    {
+      "search": {
+        "indices": [
+          "logs-*-*",
+          "beats-*"
+        ],
+        "query": {
+          "size": 1,
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "query_string": {
+                    "query": "winlog.channel:Microsoft\\-Windows\\-Sysmon\\/Operational AND (event.code:8 AND ((process.executable:(*\\\\System32\\\\cscript.exe OR *\\\\System32\\\\wscript.exe OR *\\\\System32\\\\mshta.exe OR *\\\\winword.exe OR *\\\\excel.exe)) AND winlog.event_data.TargetImage:*\\\\SysWOW64\\\\* AND (NOT _exists_:winlog.event_data.StartModule)))",
+                    "analyze_wildcard": true
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "tags": [
+    "attack-defense-evasion",
+    "attack-execution",
+    "attack-t1055.012",
+    "attack-t1059.005",
+    "attack-t1059.007",
+    "attack-t1218.005"
+  ],
+  "triggers": [
+    {
+      "name": "generated-trigger",
+      "severity": 2,
+      "condition": {
+        "script": {
+          "source": "ctx.results[0].hits.total.value > 0",
+          "lang": "painless"
+        }
+      },
+      "actions": []
+    }
+  ],
+  "sigma_meta_data": {
+    "rule_id": "2e4e488a-6164-4811-9ea1-f960c7359c40",
+    "threat": []
+  },
+  "references": [
+    "https://twitter.com/SBousseaden/status/1090588499517079552",
+    "https://github.com/mdsecactivebreach/CACTUSTORCH"
+  ]
+}
